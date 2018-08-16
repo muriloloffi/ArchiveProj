@@ -2,14 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-//Programa criar um arquivo bin e manipula informações usando as funcoues de escrita e leitura
+//Programa criar um arquivo bin e manipula informaÃ§Ãµes usando as funÃ§Ãµes de escrita e leitura
 
 const unsigned int wanted_size = 1073741824;	
-	
+int valida(int val);
+
 typedef struct {
-int i ;
-char str [30]; // tamanho do buffer
-}reg;
+	char *nome1, *nome2, *nome3, *equipe;
+	int baloes, erros;
+}reg; 
 
 //selecao do tamanho do arquivo ou valor informado pelo usuario
 int escolha_tam(){
@@ -32,7 +33,7 @@ int escolha_tam(){
 			if(valida(escolha)==0){
 				val=escolha;
 			}else{
-				printf("\ncriado no tamanho padrao de 1 KB!");
+				printf("\nCriado no tamanho padrao de 1 KB!");
 				val=1024;
 			}
 			break;
@@ -54,23 +55,23 @@ int valida(int val){
 
 int main(int argc, char *argv[]) {
 
-	
+
 	FILE *fp;  								//arquivo
- 	int count, size , wanted_size;			//int
+ 	int count, size, wanted_size;			//int
  	reg registro, aux;						//registros
-	clock_t t, end;						//variaveis do relógio
-    double cpu_time_used;					//tempo de processamento
+	clock_t t/*, end*/;						//variaveis do relÃ³gio
+    double *cpu_time_used = NULL;					//tempo de processamento
     
 	wanted_size=escolha_tam();				//tamano do arquivo
-	char nome_arq[] = "C:\\Users\\guilh\\Desktop\\Arquivos\\p2\\teste.txt";
+	char nome_arq[] = "./teste.txt";
 	
- 	t = clock();//inicia relógio
+ 	t = clock();//inicia relÃ³gio
  	
  	if (( fp = fopen( nome_arq,"w+" )) == NULL ){
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
-	printf(CLOCKS_PER_SEC);
+//	printf(CLOCKS_PER_SEC);
 	//definicao do tamanho do arquivo atravez do fseek
   	fseek(fp, wanted_size - 1, SEEK_SET);
     // Write at least one byte to extend the file (if necessary).
@@ -78,9 +79,8 @@ int main(int argc, char *argv[]) {
     fclose(fp);
     
     t = clock() -t; //terminate clock
-    cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
-    printf("tempo utilizado: %.2d",&cpu_time_used);
+    *cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
+    printf("tempo utilizado: %.2f", *cpu_time_used);
     
- 
  }
 
