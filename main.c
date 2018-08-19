@@ -84,9 +84,9 @@ int main(int argc, char *argv[]) {
 	anyFile_FixedSize(fp, wanted_size);
     fclose(fp);
     
-    t = clock() -t; //terminate clock
-    *cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
-    printf("tempo utilizado: %.2f", *cpu_time_used);
+//    t = clock() -t; //terminate clock
+//    *cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
+//    printf("tempo utilizado: %.2f", *cpu_time_used);
     
  }
 
