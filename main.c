@@ -5,16 +5,49 @@
 #include "Lista/Lista.h"
 //Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
 
-const unsigned int wanted_size = 1073741824;	
-int valida(int val);
-void anyFile_FixedSize(FILE *fp, int wanted_size);
-
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
+const unsigned int wanted_size = 1073741824;
 
-//selecao do tamanho do arquivo ou valor informado pelo usuario
+//FUNÇÕES declaradas abaixo estão implementadas depois da main!
+int valida(int val);
+void anyFile_FixedSize(FILE *fp, int wanted_size);
+int escolha_tam();
+
+
+int main(int argc, char *argv[]) {
+
+
+	FILE *fp;  								//arquivo
+ 	int wanted_size; //int count, size; 	//int
+ 	reg registro, aux;						//registros
+	clock_t t, end;						//variaveis do relógio
+    double *cpu_time_used = NULL;			//tempo de processamento
+    
+	wanted_size=escolha_tam();				//tamano do arquivo
+	char nome_arq[] = "./teste.txt";
+
+	int escolha_tam();
+	
+ 	t = clock();//inicia relógio
+ 	
+ 	if (( fp = fopen( nome_arq,"w+" )) == NULL ){
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+//	printf(CLOCKS_PER_SEC);
+	anyFile_FixedSize(fp, wanted_size);
+    fclose(fp);
+    
+//    t = clock() -t; //terminate clock
+//    *cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
+//    printf("tempo utilizado: %.2f", *cpu_time_used);
+    
+ }
+
+//Menu de selecao do tamanho do arquivo ou valor informado pelo usuario
 int escolha_tam(){
 	int escolha,val;
 	printf("Escolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Custom Bytes\n\nValor digitado:");
@@ -61,32 +94,3 @@ void anyFile_FixedSize(FILE *fp, int wanted_size){
     // Write at least one byte to extend the file (if necessary).
     fwrite("", 1, sizeof(char), fp);
 }
-
-int main(int argc, char *argv[]) {
-
-
-	FILE *fp;  								//arquivo
- 	int wanted_size; //int count, size; 	//int
- 	reg registro, aux;						//registros
-	clock_t t, end;						//variaveis do relógio
-    double *cpu_time_used = NULL;			//tempo de processamento
-    
-	wanted_size=escolha_tam();				//tamano do arquivo
-	char nome_arq[] = "./teste.txt";
-	
- 	t = clock();//inicia relógio
- 	
- 	if (( fp = fopen( nome_arq,"w+" )) == NULL ){
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
-	}
-//	printf(CLOCKS_PER_SEC);
-	anyFile_FixedSize(fp, wanted_size);
-    fclose(fp);
-    
-//    t = clock() -t; //terminate clock
-//    *cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
-//    printf("tempo utilizado: %.2f", *cpu_time_used);
-    
- }
-
