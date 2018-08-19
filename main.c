@@ -2,15 +2,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "Lista/Lista.h"
 //Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
 
 const unsigned int wanted_size = 1073741824;	
 int valida(int val);
+void anyFile_FixedSize(FILE *fp, int wanted_size);
 
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
-}reg; 
+}reg;
 
 //selecao do tamanho do arquivo ou valor informado pelo usuario
 int escolha_tam(){
@@ -53,14 +55,21 @@ int valida(int val){
 	return 0;
 }
 
+void anyFile_FixedSize(FILE *fp, int wanted_size){
+	//definicao do tamanho do arquivo atravez do fseek
+  	fseek(fp, wanted_size - 1, SEEK_SET);
+    // Write at least one byte to extend the file (if necessary).
+    fwrite("", 1, sizeof(char), fp);
+}
+
 int main(int argc, char *argv[]) {
 
 
 	FILE *fp;  								//arquivo
- 	int count, size, wanted_size;			//int
+ 	int wanted_size; //int count, size; 	//int
  	reg registro, aux;						//registros
-	clock_t t/*, end*/;						//variaveis do relógio
-    double *cpu_time_used = NULL;					//tempo de processamento
+	clock_t t, end;						//variaveis do relógio
+    double *cpu_time_used = NULL;			//tempo de processamento
     
 	wanted_size=escolha_tam();				//tamano do arquivo
 	char nome_arq[] = "./teste.txt";
@@ -72,10 +81,7 @@ int main(int argc, char *argv[]) {
 		exit (0);
 	}
 //	printf(CLOCKS_PER_SEC);
-	//definicao do tamanho do arquivo atravez do fseek
-  	fseek(fp, wanted_size - 1, SEEK_SET);
-    // Write at least one byte to extend the file (if necessary).
-    fwrite("", 1, sizeof(char), fp);
+	anyFile_FixedSize(fp, wanted_size);
     fclose(fp);
     
     t = clock() -t; //terminate clock
