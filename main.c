@@ -3,44 +3,53 @@
 #include <string.h>
 #include <time.h>
 #include "Lista/Lista.h"
-//Programa criar um arquivo bin e manipula informaÃ§Ãµes usando as funÃ§Ãµes de escrita e leitura
+//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
 
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
-const unsigned int wanted_size = 1073741824;
 
-//FUNÃ‡Ã•ES declaradas abaixo estÃ£o implementadas depois da main!
+
+//FUNÇÕES declaradas abaixo estão implementadas depois da main!
 int valida(int val);
 void anyFile_FixedSize(FILE *fp, int wanted_size);
 int escolha_tam();
-
+void ler_tudo(FILE *fp,char nome_arq[]);
 
 int main(int argc, char *argv[]) {
-
 
 	FILE *fp;  								//arquivo
  	int wanted_size; //int count, size; 	//int
  	reg registro, aux;						//registros
-	clock_t t, end;						//variaveis do relÃ³gio
+	clock_t t, end;						//variaveis do relógio
     double *cpu_time_used = NULL;			//tempo de processamento
+    char nome_arq[] = "./data.txt";
     
 	wanted_size=escolha_tam();				//tamano do arquivo
-	char nome_arq[] = "./teste.txt";
 
-	int escolha_tam();
-	
- 	t = clock();//inicia relÃ³gio
- 	
- 	if (( fp = fopen( nome_arq,"w+" )) == NULL ){
+
+ 	if (( fp = fopen(nome_arq,"w+" )) == NULL ){
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
-//	printf(CLOCKS_PER_SEC);
+	
 	anyFile_FixedSize(fp, wanted_size);
+	
+	//atribuicoes , deve alterar para valores aleatorios
+	registro.baloes=1;
+	registro.equipe="c";
+	registro.erros=0;
+	registro.nome1="Guilherme";
+	registro.nome2="Murilo";
+	registro.nome3="Joao";
+	
+	fprintf(fp,"%i,%s,%i,%s,%s,%s",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
+	printf("Inclusao sucesso;");
+	
     fclose(fp);
-    
+ 
+//Reimplementando relógio    
 //    t = clock() -t; //terminate clock
 //    *cpu_time_used = ((double)t)/ CLOCKS_PER_SEC;
 //    printf("tempo utilizado: %.2f", *cpu_time_used);
@@ -93,4 +102,22 @@ void anyFile_FixedSize(FILE *fp, int wanted_size){
   	fseek(fp, wanted_size - 1, SEEK_SET);
     // Write at least one byte to extend the file (if necessary).
     fwrite("", 1, sizeof(char), fp);
+    rewind(fp); // retorna ao começo do arquivo
+}
+
+void rand_fill(){
+	//reg.baloes=rand(int);
+	//reg.equipe=rand();
+}
+
+void ler_tudo(FILE *fp,char nome_arq[]){
+   char c;
+	fp= fopen(nome_arq, "r");
+  if(fp != NULL)
+  {
+    while((c = fgetc(fp)) != EOF) putchar(c);
+    printf("%[]\n",c);
+    fclose(fp);
+  }
+
 }
