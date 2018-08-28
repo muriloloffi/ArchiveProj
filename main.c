@@ -4,7 +4,9 @@
 #include <time.h>
 #include "Lista/Lista.h"
 #include <time.h>
-#include <windows.h>
+#define Giga 1073741824
+#define Mega 1048576
+#define Kilo 1024
 //Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
 
 //Criação de uma struct de registro
@@ -15,87 +17,98 @@ typedef struct {
 
 
 //FUNÇÕES declaradas abaixo estão implementadas depois da main!
-int valida(int val);
-void anyFile_FixedSize(FILE *fp, int wanted_size); //altera o arquivo bin para o tamanho passado.
-int escolha_tam(); //Menu de tamanhos para escolha
-void ler_tudo(FILE *fp,char nome_arq[]); //le todo conteudo do arquivo e imprime na tela
-int rand_fill(); //retorna um int aleatorio
-char *randstring(size_t length);//retorna uma string aleatoria de tamanho espeficado no parametro
+int valida(int val);									//confere se não passou de 1gb o tamanho solicitado
+int escolha_tam(); 										//Menu de tamanhos para escolha
+void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
+int rand_fill(); 										//retorna um int aleatorio
+char *randstring(size_t length);						//retorna uma string aleatoria de tamanho espeficado no parametro
+
+
 
 int main(int argc, char *argv[]) {
 
 	FILE *fp; 								//arquivo
-	char c; 								//char
- 	int wanted_size; 						//int
- 	reg registro, aux;						//registros
+	char c;								//char
+ 	int wanted_size,q,sz;
+	double count; 						//int
+ 	reg registro;						//registros
 	clock_t start, end;						//variaveis do relógio
-    char nome_arq[] = "./data.txt";
-    
+    char nome_arq[] = "./data.bin";
+    		    
 	wanted_size=escolha_tam();				//tamano do arquivo
 	start = clock(); 						//inicia contagem do tempo
 	
 	//Abertura/ criação do arquivo
- 	if (( fp = fopen(nome_arq,"w+" )) == NULL ){
+ 	if (( fp = fopen(nome_arq,"wb+" )) == NULL ){
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
 	
-	anyFile_FixedSize(fp, wanted_size); 	// aumenta o tamanho do arquivo
-	
 	
 	//Gera os valores aleatórios até encher o arquivo
+	count =0;
 	do{
 	
-	registro.baloes=rand_fill();
-	registro.equipe=randstring(rand_fill());
-	registro.erros=rand_fill();
-	registro.nome1=randstring(rand_fill());
-	registro.nome2=randstring(rand_fill());
-	registro.nome3=randstring(rand_fill());
+		registro.baloes=rand_fill();
+		registro.equipe=randstring(20);
+		registro.erros=rand_fill();
+		registro.nome1=randstring(20);
+		registro.nome2=randstring(20);
+		registro.nome3=randstring(20);
 	
-	//Escreve valores no arquivo
-	fprintf(fp,"%i,%s,%i,%s,%s,%s$",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
-	/* Imprime os valores aleatorios escritos no arquivo
-	printf("\nInclusao sucesso\n%i\n%s\n%i\n%s\n%s\n%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
-	*/
-	}while((c = fgetc(fp)) != EOF);
+
+		//Escreve valores no arquivo
+		fprintf(fp,"%i,%s,%i,%s,%s,%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
+		
+		count++;
+		
+		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
+		
+		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
+		sz = ftell(fp);           // informa tamanho e armazena em SZ
+		
+	}while(sz<wanted_size);
 	
     fclose(fp);
  	
- 	/*  Teste da leitura do arquivo
- 	printf("\n\n\nLEITURAASSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n\n");
- 	ler_tudo(fp,nome_arq);
-    */
+ 	printf("\nRegistros totais: %1.f",count);
     
-    //Fim ca contagem do tempo e computa tempo total.
-	end = clock(); //terminate clock
-	printf("tempo utilizado: %.5f",(((double)(end-start)/CLOCKS_PER_SEC)));
+    //Fim da contagem do tempo e computa tempo total.
+	end = clock(); 					//finaliza relogio
+	printf("\n\n--------------------------------------------------------------");
+	printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado
+    
+    printf("\nDeseja ler o arquivo? tecle 1\n    ");
+    scanf("%i",&q);
+    if(q==1){
+    	ler_tudo(fp,nome_arq); // funcao para ler todo arquivo e imprimir na tela
+	}
     
  }
 
 //Menu de selecao do tamanho do arquivo ou valor informado pelo usuario
 int escolha_tam(){
 	int escolha,val;
-	printf("Escolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Custom Bytes\n\nValor digitado:");
+	printf("Escolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\n\nValor digitado:");
 	scanf("%i",&escolha);
 	switch(escolha){
 	 	case 1:
-	 		val = 1024; //1KB
+	 		val = Kilo; //1KB
 	 		break;
 		case 2:
-			val = 1048576; //1 MB
+			val = Mega; //1 MB
 			break;
 		case 3:
-			val= 1073741824; //1GB
+			val= Giga; //1GB
 			break;
 		case 4:
-			printf("Informe valor em bytes:");
+			printf("Informe o tamanho do arquivo em bytes:");
 			scanf("%i",&escolha);
 			if(valida(escolha)==0){
 				val=escolha;
 			}else{
-				printf("\nCriado no tamanho padrao de 1 KB!");
-				val=1024;
+				printf("\nCriado com 1 registro!");
+				val=1;
 			}
 			break;
 		default:
@@ -107,47 +120,33 @@ int escolha_tam(){
 
 //funcao que verifica se o tamanho maximo nao ultrapassou o limite de 1 GB
 int valida(int val){
-	if(val>1073741824){
-		printf("\nArquivo ultrapassa o tamanho maximo de 1 GB!\n");
+	if(val>Giga){
+		printf("\nArquivo ultrapassa o tamanho maximo de registros +1GB!\n");
 		return 1;
 	}
 	return 0;
 }
 
-void anyFile_FixedSize(FILE *fp, int wanted_size){
-	//definicao do tamanho do arquivo atravez do fseek
-  	fseek(fp, wanted_size - 1, SEEK_SET);
-    // Write at least one byte to extend the file (if necessary).
-    fwrite("", 1, sizeof(char), fp);
-    rewind(fp); // retorna ao começo do arquivo
-}
-
 int rand_fill(){
-	//gera valor int aleatorio até 99
+	//gera valor int aleatorio até 9
 	int iRand;
-	iRand=(rand() % 99);
+	iRand=(rand() % 9);
 	return iRand;
 }
 
 char *randstring(size_t tam) {
 	int n;
-    static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"; //lista de chars possiveis  
+    static char charset[] = "abcdefghijklmnopqrstuvwxyz"; 	//lista de chars possiveis  
     char *randomString = NULL; //string
 
-    if (tam) { 
-        randomString = malloc(sizeof(char) * (tam +1));
-
-        if (randomString) {            
-            for ( n = 0;n < tam;n++) {    //for do tamanho         
-                int key = rand() % (int)(sizeof(charset) -1); //pega um int do tamanho da lista
-                randomString[n] = charset[key];  // a string recebe o char na posicao aleatoria key
-            }
-
-            randomString[tam] = '\0'; //final da string
-        }
+    randomString = malloc(sizeof(char) * (tam +1));         //aloca tamanho da string  
+    for ( n = 0;n < tam;n++) {    							//for do tamanho         
+    	int key = rand() % (int)(sizeof(charset) -1); 		//pega um int do tamanho da lista
+		randomString[n] = charset[key];  					// a string recebe o char na posicao aleatoria sorteada acima
     }
 
-    return randomString;
+    randomString[tam] = '\0'; 								//final da string
+    return randomString; 									// retorna valor 
 }
 
 void ler_tudo(FILE *fp,char nome_arq[]){
@@ -157,7 +156,7 @@ void ler_tudo(FILE *fp,char nome_arq[]){
   {
   	//percorre arquivo até o final imprimindo na tela
     while((c = fgetc(fp)) != EOF) putchar(c);
-    printf("%[]\n",c);
+    printf("%\n",c);
     fclose(fp);
   }
 
