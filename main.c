@@ -7,17 +7,17 @@
 #define Giga 1073741824
 #define Mega 1048576
 #define Kilo 1024
-//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
+//Programa criar um arquivo bin e manipula informaï¿½ï¿½es usando as funï¿½ï¿½es de escrita e leitura
 
-//Criação de uma struct de registro
+//Criaï¿½ï¿½o de uma struct de registro
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
 
 
-//FUNÇÕES declaradas abaixo estão implementadas depois da main!
-int valida(int val);									//confere se não passou de 1gb o tamanho solicitado
+//FUNï¿½ï¿½ES declaradas abaixo estï¿½o implementadas depois da main!
+int valida(int val);									//confere se nï¿½o passou de 1gb o tamanho solicitado
 int escolha_tam(); 										//Menu de tamanhos para escolha
 void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
 int rand_fill(); 										//retorna um int aleatorio
@@ -28,24 +28,23 @@ char *randstring(size_t length);						//retorna uma string aleatoria de tamanho 
 int main(int argc, char *argv[]) {
 
 	FILE *fp; 								//arquivo
-	char c;								//char
  	int wanted_size,q,sz;
 	double count; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do relógio
+	clock_t start, end;						//variaveis do relï¿½gio
     char nome_arq[] = "./data.bin";
     		    
 	wanted_size=escolha_tam();				//tamano do arquivo
 	start = clock(); 						//inicia contagem do tempo
 	
-	//Abertura/ criação do arquivo
+	//Abertura/ criaï¿½ï¿½o do arquivo
  	if (( fp = fopen(nome_arq,"wb+" )) == NULL ){
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
 	
 	
-	//Gera os valores aleatórios até encher o arquivo
+	//Gera os valores aleatï¿½rios atï¿½ encher o arquivo
 	count =0;
 	do{
 	
@@ -62,9 +61,9 @@ int main(int argc, char *argv[]) {
 		
 		count++;
 		
-		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
+		//printf("\n Inclusï¿½o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
 		
-		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
+		fseek(fp, 0L, SEEK_END);  // percorre atï¿½ o fim do arquivo 
 		sz = ftell(fp);           // informa tamanho e armazena em SZ
 		
 	}while(sz<wanted_size);
@@ -128,7 +127,7 @@ int valida(int val){
 }
 
 int rand_fill(){
-	//gera valor int aleatorio até 9
+	//gera valor int aleatorio atï¿½ 9
 	int iRand;
 	iRand=(rand() % 9);
 	return iRand;
@@ -154,9 +153,8 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 	fp= fopen(nome_arq, "rb");
   if(fp != NULL)
   {
-  	//percorre arquivo até o final imprimindo na tela
+  	//percorre arquivo atï¿½ o final imprimindo na tela
     while((c = fgetc(fp)) != EOF) putchar(c);
-    printf("%\n",c);
     fclose(fp);
   }
 
