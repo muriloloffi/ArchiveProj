@@ -7,88 +7,86 @@
 #define Giga 1073741824
 #define Mega 1048576
 #define Kilo 1024
-//Programa criar um arquivo bin e manipula informaÃ§Ãµes usando as funÃ§Ãµes de escrita e leitura
 
-//CriaÃ§Ã£o de uma struct de registro
+
+/* TO DO
+
+
+verificar o erro na geração do arquivo 
+implementar indexação
+
+
+
+
+*/
+
+
+//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
+
+
+//Criação de uma struct de registro
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
 
 
-//FUNÃ‡Ã•ES declaradas abaixo estÃ£o implementadas depois da main!
-int valida(int val);									//confere se nÃ£o passou de 1gb o tamanho solicitado
+//FUNÇÕES declaradas abaixo estão implementadas depois da main!
+int valida(int val);									//confere se não passou de 1gb o tamanho solicitado
 int escolha_tam(); 										//Menu de tamanhos para escolha
 void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
 int rand_fill(); 										//retorna um int aleatorio
 char *randstring(size_t length);						//retorna uma string aleatoria de tamanho espeficado no parametro
-
+int preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
+int escolhe_menu();
 
 
 int main(int argc, char *argv[]) {
 
 	FILE *fp; 								//arquivo
- 	int wanted_size,q,sz;
+	char c;								//char
+ 	int wanted_size,q,escolha,reg_total; 
 	double count; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do relÃ³gio
+	clock_t start, end;						//variaveis do relógio
     char nome_arq[] = "./data.bin";
     		    
-	wanted_size=escolha_tam();				//tamano do arquivo
-	start = clock(); 						//inicia contagem do tempo
 	
-	//Abertura criaÃ§Ã£o do arquivo
- 	if (( fp = fopen(nome_arq,"wb+" )) == NULL ){
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
+								//inicia contagem do tempo
+	escolha=escolhe_menu();					//printa menu e retorna o valor da escolha
+	
+	switch(escolha){
+		case 1:
+			wanted_size=escolha_tam();			//tamano do arquivo
+			start = clock(); 	
+			reg_total=preenche(fp,wanted_size,registro,nome_arq);
+			end = clock(); 	
+	 		break;
+		case 2:	
+		   	printf("\n1: Equipes \n2: Erros \n3: Balões \n4 Componente1 \n5 Componente2 \n6 Componente6");
+			scanf("%i",&escolha);
+			//funcao de indexação , incluir relógio
+			break;
+		case 3:
+			ler_tudo(fp,nome_arq);
+			break;
+		
 	}
 	
-	
-	//Gera os valores aleatï¿½rios atï¿½ encher o arquivo
-	count =0;
-	do{
-	
-		registro.baloes=rand_fill();
-		registro.equipe=randstring(20);
-		registro.erros=rand_fill();
-		registro.nome1=randstring(20);
-		registro.nome2=randstring(20);
-		registro.nome3=randstring(20);
-	
-
-		//Escreve valores no arquivo
-		fprintf(fp,"%i,%s,%i,%s,%s,%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
-		
-		count++;
-		
-		//printf("\n Inclusï¿½o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
-		
-		fseek(fp, 0L, SEEK_END);  // percorre atÃ© o fim do arquivo 
-		sz = ftell(fp);           // informa tamanho e armazena em SZ
-		
-	}while(sz<wanted_size);
-	
-    fclose(fp);
- 	
- 	printf("\nRegistros totais: %1.f",count);
+ 	printf("\nRegistros totais: %1.f",reg_total);  
     
     //Fim da contagem do tempo e computa tempo total.
 	end = clock(); 					//finaliza relogio
 	printf("\n\n--------------------------------------------------------------");
 	printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado
     
-    printf("\nDeseja ler o arquivo? tecle 1\n    ");
-    scanf("%i",&q);
-    if(q==1){
-    	ler_tudo(fp,nome_arq); // funcao para ler todo arquivo e imprimir na tela
-	}
     
  }
 
 //Menu de selecao do tamanho do arquivo ou valor informado pelo usuario
 int escolha_tam(){
 	int escolha,val;
-	printf("Escolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\n\nValor digitado:");
+	printf("\nEscolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\n 5: Escolha o campo de indexação\nValor digitado:");
 	scanf("%i",&escolha);
 	switch(escolha){
 	 	case 1:
@@ -109,13 +107,21 @@ int escolha_tam(){
 				printf("\nCriado com 1 registro!");
 				val=1;
 			}
-			break;
+			break;	
 		default:
 			val= 1;
 			break; 	
 	 }
 	return val;
 }
+
+int escolhe_menu(){
+	int escolha;
+	printf("Escolha a opção desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexação\n 3: Exibir arquivo \nValor digitado:");
+	scanf("%i",&escolha);
+	return escolha;
+}
+
 
 //funcao que verifica se o tamanho maximo nao ultrapassou o limite de 1 GB
 int valida(int val){
@@ -127,7 +133,7 @@ int valida(int val){
 }
 
 int rand_fill(){
-	//gera valor int aleatorio atÃ© 9
+	//gera valor int aleatorio até 9
 	int iRand;
 	iRand=(rand() % 9);
 	return iRand;
@@ -153,10 +159,44 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 	fp= fopen(nome_arq, "rb");
   if(fp != NULL)
   {
-  	//percorre arquivo atÃ© o final imprimindo na tela
+  	//percorre arquivo até o final imprimindo na tela
     while((c = fgetc(fp)) != EOF) putchar(c);
+    printf("%\n",c);
     fclose(fp);
   }
 
 }
 
+int preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
+	int count,sz;
+	//Gera os valores aleatórios até encher o arquivo
+	count =0;
+	if (( fp = fopen(nome_arq,"wb+")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	do{
+	
+		registro.baloes=rand_fill();
+		registro.equipe=randstring(20);
+		registro.erros=rand_fill();
+		registro.nome1=randstring(20);
+		registro.nome2=randstring(20);
+		registro.nome3=randstring(20);
+	
+
+		//Escreve valores no arquivo
+		fprintf(fp,"%i,%s,%i,%s,%s,%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
+		
+		count++;
+		
+		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
+		
+		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
+		sz = ftell(fp);           // informa tamanho e armazena em SZ
+		
+	}while(sz<Wanted_size);
+	
+	fclose(fp);
+	return count;
+}
