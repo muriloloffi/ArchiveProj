@@ -7,17 +7,17 @@
 #define Giga 1073741824
 #define Mega 1048576
 #define Kilo 1024
-//Programa criar um arquivo bin e manipula informa��es usando as fun��es de escrita e leitura
+//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
 
-//Cria��o de uma struct de registro
+//Criação de uma struct de registro
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
 
 
-//FUN��ES declaradas abaixo est�o implementadas depois da main!
-int valida(int val);									//confere se n�o passou de 1gb o tamanho solicitado
+//FUNÇÕES declaradas abaixo estão implementadas depois da main!
+int valida(int val);									//confere se não passou de 1gb o tamanho solicitado
 int escolha_tam(); 										//Menu de tamanhos para escolha
 void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
 int rand_fill(); 										//retorna um int aleatorio
@@ -31,13 +31,13 @@ int main(int argc, char *argv[]) {
  	int wanted_size,q,sz;
 	double count; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do rel�gio
+	clock_t start, end;						//variaveis do relógio
     char nome_arq[] = "./data.bin";
     		    
 	wanted_size=escolha_tam();				//tamano do arquivo
 	start = clock(); 						//inicia contagem do tempo
 	
-	//Abertura/ cria��o do arquivo
+	//Abertura criação do arquivo
  	if (( fp = fopen(nome_arq,"wb+" )) == NULL ){
  		printf ("Erro na abertura do arquivo");
 		exit (0);
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 		
 		//printf("\n Inclus�o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
 		
-		fseek(fp, 0L, SEEK_END);  // percorre at� o fim do arquivo 
+		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
 		sz = ftell(fp);           // informa tamanho e armazena em SZ
 		
 	}while(sz<wanted_size);
@@ -127,7 +127,7 @@ int valida(int val){
 }
 
 int rand_fill(){
-	//gera valor int aleatorio at� 9
+	//gera valor int aleatorio até 9
 	int iRand;
 	iRand=(rand() % 9);
 	return iRand;
@@ -153,7 +153,7 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 	fp= fopen(nome_arq, "rb");
   if(fp != NULL)
   {
-  	//percorre arquivo at� o final imprimindo na tela
+  	//percorre arquivo até o final imprimindo na tela
     while((c = fgetc(fp)) != EOF) putchar(c);
     fclose(fp);
   }
