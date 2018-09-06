@@ -2,24 +2,23 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "Lista/Lista.h"
 #include <time.h>
+#include <conio.h>
+
+//Constantes Globais
 #define Giga 1073741824
 #define Mega 1048576
 #define Kilo 1024
 
 
+
 /* TO DO
 
-
-verificar o erro na geração do arquivo 
 implementar indexação
 
-
-
+secundario - implementar um menu melhorado ! , limpar tela , tecla de saida e loop no menu.
 
 */
-
 
 //Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
 
@@ -37,7 +36,7 @@ int escolha_tam(); 										//Menu de tamanhos para escolha
 void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
 int rand_fill(); 										//retorna um int aleatorio
 char *randstring(size_t length);						//retorna uma string aleatoria de tamanho espeficado no parametro
-int preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
+double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
 int escolhe_menu();
 
 
@@ -45,8 +44,8 @@ int main(int argc, char *argv[]) {
 
 	FILE *fp; 								//arquivo
 	char c;								//char
- 	int wanted_size,q,escolha,reg_total; 
-	double count; 						//int
+ 	int wanted_size,q,escolha; 
+	double reg_total; 						//int
  	reg registro;						//registros
 	clock_t start, end;						//variaveis do relógio
     char nome_arq[] = "./data.bin";
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
 			end = clock(); 	
 	 		break;
 		case 2:	
-		   	printf("\n1: Equipes \n2: Erros \n3: Balões \n4 Componente1 \n5 Componente2 \n6 Componente6");
+		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4 Componente 1 \n5 Componente 2 \n6 Componente 3");
 			scanf("%i",&escolha);
 			//funcao de indexação , incluir relógio
 			break;
@@ -86,7 +85,7 @@ int main(int argc, char *argv[]) {
 //Menu de selecao do tamanho do arquivo ou valor informado pelo usuario
 int escolha_tam(){
 	int escolha,val;
-	printf("\nEscolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\n 5: Escolha o campo de indexação\nValor digitado:");
+	printf("\nEscolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\nValor digitado:");
 	scanf("%i",&escolha);
 	switch(escolha){
 	 	case 1:
@@ -112,12 +111,13 @@ int escolha_tam(){
 			val= 1;
 			break; 	
 	 }
+	 
 	return val;
 }
 
 int escolhe_menu(){
 	int escolha;
-	printf("Escolha a opção desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexação\n 3: Exibir arquivo \nValor digitado:");
+	printf("Escolha a opcao desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexacao\n 3: Exibir arquivo \nValor digitado:");
 	scanf("%i",&escolha);
 	return escolha;
 }
@@ -167,8 +167,9 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 
 }
 
-int preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
-	int count,sz;
+double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
+	int sz;
+	double count;
 	//Gera os valores aleatórios até encher o arquivo
 	count =0;
 	if (( fp = fopen(nome_arq,"wb+")) == NULL ){	//abre o arquivo
@@ -200,3 +201,4 @@ int preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	fclose(fp);
 	return count;
 }
+
