@@ -15,6 +15,7 @@
 /* TO DO
 
 implementar indexação
+localizacao de registro.
 
 secundario - implementar um menu melhorado ! , limpar tela , tecla de saida e loop no menu.
 
@@ -38,17 +39,19 @@ int rand_fill(); 										//retorna um int aleatorio
 char *randstring(size_t length);						//retorna uma string aleatoria de tamanho espeficado no parametro
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
 int escolhe_menu();
-
+void registra(double registro,FILE *cc, char nome_reg[]);
+void valRegistro(double count,FILE *fp);
 
 int main(int argc, char *argv[]) {
 
-	FILE *fp; 								//arquivo
+	FILE *fp, *cc; 								//arquivo
 	char c;								//char
  	int wanted_size,q,escolha; 
 	double reg_total; 						//int
  	reg registro;						//registros
 	clock_t start, end;						//variaveis do relógio
     char nome_arq[] = "./data.bin";
+    char nome_reg[] = "./reg.bin";
     		    
 	
 								//inicia contagem do tempo
@@ -72,7 +75,10 @@ int main(int argc, char *argv[]) {
 		
 	}
 	
- 	printf("\nRegistros totais: %1.f",reg_total);  
+	registra(reg_total,cc,nome_reg); //
+ 	printf("\nRegistros totais: %1.f",reg_total); 
+	
+	valRegistro(2,fp);  
     
     //Fim da contagem do tempo e computa tempo total.
 	end = clock(); 					//finaliza relogio
@@ -187,7 +193,7 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	
 
 		//Escreve valores no arquivo
-		fprintf(fp,"%i,%s,%i,%s,%s,%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
+		fprintf(fp,"%i,%s,%i,%s,%s,%s$",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
 		
 		count++;
 		
@@ -202,3 +208,37 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	return count;
 }
 
+void valRegistro(double count,FILE *fp){
+	double valRegistro;
+		valRegistro=((count-1)*67); //tamanho fixo em bits
+		printf("\n valor do registro 2 %.0lf",valRegistro);
+	//return valRegistro	
+}
+
+void registra(double registro,FILE *cc, char nome_reg[]){
+	if (( cc = fopen(nome_reg,"wb+")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	fprintf(cc,"%.0lf",registro);
+	fclose(cc);
+}
+
+
+
+
+
+/* implementar busca de registro especifico
+void localiza_reg(int reg, double count,FILE *fp){
+	double posicao;
+	if( reg < count){
+		posicao= (reg*(67)-1) //tamanho fixo em bits
+		fsetpos()
+		
+		
+	}else
+		printf("\n Valor selecionado fora dos registros do arquivo");
+}
+
+
+*/
