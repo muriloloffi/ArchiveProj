@@ -42,6 +42,8 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]);
 int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
 void valRegistro(double count,FILE *fp);
+void buscaReg(FILE *fp);									//busca por paginação os registros e imprime na tela com o valor do registro.
+
 
 int main(int argc, char *argv[]) {
 
@@ -68,6 +70,7 @@ int main(int argc, char *argv[]) {
 		case 2:	
 		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4 Componente 1 \n5 Componente 2 \n6 Componente 3");
 			scanf("%i",&escolha);
+			buscaReg(fp);
 			//funcao de indexação , incluir relógio
 			break;
 		case 3:
@@ -225,7 +228,13 @@ void registra(double registro,FILE *cc, char nome_reg[]){
 	fclose(cc);
 }
 
-
+void buscaReg(FILE *fp){
+	void * buf;
+	int t,size,count;
+	t=fread(buf,size,count,fp );
+	printf(buf);
+	
+}
 
 
 
