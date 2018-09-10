@@ -1,0 +1,83 @@
+The following code can fetch values from a file, sorts them and displays them on the console. It assumes that the values are separated by a new line ('\n'). 
+
+You can modify the code as per your needs. The code has been tried on Fedora 14. 
+
+To run 
+$ ./a.out values.txt 
+CODE: 
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <string.h> 
+const int MAX = 1024; 
+/* inserts <value> into <sorted> containing <count> values */ 
+void insert_sorted (long *sorted, int count, long value) 
+{ 
+int i = 0; 
+
+sorted[count] = value; 
+if (count == 0) return; 
+for (i = count;i >= 0; i--) { 
+if (value < sorted[i-1]) 
+sorted[i] = sorted[i-1]; 
+else break; 
+} 
+sorted[i] = value; 
+} 
+int main (int argc, char *argv[]) 
+{ 
+FILE *infile = NULL; 
+long sorted[1024]; 
+long value; 
+int count = 0; 
+int i = 0; 
+if (argc < 2) { 
+fprintf (stderr, ""Usage : %s <file_name>\n"", argv[0]); 
+return 1; 
+} 
+infile = fopen (argv[1], ""r""); 
+if (NULL == infile) { 
+perror (""fopen""); 
+return -1; 
+} 
+/* while file not ends */ 
+while (!feof (infile)) { 
+fscanf (infile, ""%ld\n"", &value); /* fetch value */ 
+insert_sorted (sorted, count, value); /* sort */ 
+++count; /* increase number of sorted values */ 
+} 
+/* display values */ 
+printf (""Sorted values : ""); 
+for (i = 0; i < count; i++ ) { 
+printf (""%ld "", sorted[i]); 
+} 
+/* cleanup */ 
+if (infile) { 
+fclose (infile); 
+infile = NULL; 
+} 
+return 0; 
+}
+
+
+
+-----------------------------------------------
+Add the following code to replace the original contents by the sorted contents: 
+
+infile = fopen (argv[1], ""w""); 
+if (NULL == infile) { 
+perror (""fopen""); 
+return -1; 
+} 
+for (i = 0; i < count; i++ ) { 
+fprintf (infile, ""%ld\n"", sorted[i]); 
+} 
+/* cleanup */ 
+if (infile) { 
+fclose (infile); 
+infile = NULL; 
+}
+
+--------------------------------------------------
+
+
+

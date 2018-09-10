@@ -4,6 +4,7 @@
 #include <time.h>
 #include <time.h>
 #include <conio.h>
+#include "Lista/Lista.h"
 
 //Constantes Globais
 #define Giga 1073741824
@@ -193,7 +194,7 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	
 
 		//Escreve valores no arquivo
-		fprintf(fp,"%i,%s,%i,%s,%s,%s$",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
+		fprintf(fp,"%i,%s,%i,%s,%s,%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
 		
 		count++;
 		
@@ -240,5 +241,24 @@ void localiza_reg(int reg, double count,FILE *fp){
 		printf("\n Valor selecionado fora dos registros do arquivo");
 }
 
+int fflush( FILE * fp )
+int fclose( FILE * fp )
+--
+int fseek( FILE * fp, long numbytes, int origin)
+1. ponteiro para o arquivo a ser manipulado
+2. quantidade de bytes a serem deslocados
+3. ponto de referˆencia, em rela¸c˜ao ao qual, o deslocamento ´e realizado.
+Poss´iveis valores:
+Macro Valor Descri¸c˜ao
+SEEK_SET 0 Mover `a partir do in´icio do arquivo
+SEEK_CUR 1 Mover `a partir da posi¸c˜ao atual
+SEEK_END 2 Mover `a partir do final do arquivo
+
+--
+int fread( void * buf, int size, int count, FILE * fp )
+int fwrite( void * buf, int size, int count, FILE * fp )
+
+---
+fgets()
 
 */
