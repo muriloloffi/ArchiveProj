@@ -15,25 +15,25 @@
 
 /* TO DO
 
-implementar indexação
+implementar indexaÃ§Ã£o
 localizacao de registro.
 
 secundario - implementar um menu melhorado ! , limpar tela , tecla de saida e loop no menu.
 
 */
 
-//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
+//Programa criar um arquivo bin e manipula informaÃ§Ãµes usando as funÃ§Ãµes de escrita e leitura
 
 
-//Criação de uma struct de registro
+//CriaÃ§Ã£o de uma struct de registro
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
 
 
-//FUNÇÕES declaradas abaixo estão implementadas depois da main!
-int valida(int val);									//confere se não passou de 1gb o tamanho solicitado
+//FUNÃ‡Ã•ES declaradas abaixo estÃ£o implementadas depois da main!
+int valida(int val);									//confere se nÃ£o passou de 1gb o tamanho solicitado
 int escolha_tam(); 										//Menu de tamanhos para escolha
 void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
 int rand_fill(); 										//retorna um int aleatorio
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
  	int wanted_size,q,escolha; 
 	double reg_total; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do relógio
+	clock_t start, end;						//variaveis do relÃ³gio
     char nome_arq[] = "./data.bin";
     char nome_reg[] = "./reg.bin";
     		    
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 		case 2:	
 		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4 Componente 1 \n5 Componente 2 \n6 Componente 3");
 			scanf("%i",&escolha);
-			//funcao de indexação , incluir relógio
+			//funcao de indexaÃ§Ã£o , incluir relÃ³gio
 			break;
 		case 3:
 			ler_tudo(fp,nome_arq);
@@ -142,7 +142,7 @@ int valida(int val){
 }
 
 int rand_fill(){
-	//gera valor int aleatorio até 9
+	//gera valor int aleatorio atÃ© 9
 	int iRand;
 	iRand=(rand() % 9);
 	return iRand;
@@ -168,7 +168,7 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 	fp= fopen(nome_arq, "rb");
   if(fp != NULL)
   {
-  	//percorre arquivo até o final imprimindo na tela
+  	//percorre arquivo atÃ© o final imprimindo na tela
     while((c = fgetc(fp)) != EOF) putchar(c);
     printf("%\n",c);
     fclose(fp);
@@ -179,7 +179,7 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	int sz;
 	double count;
-	//Gera os valores aleatórios até encher o arquivo
+	//Gera os valores aleatÃ³rios atÃ© encher o arquivo
 	count =0;
 	if (( fp = fopen(nome_arq,"wb+")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
@@ -200,9 +200,9 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 		
 		count++;
 		
-		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
+		//printf("\n InclusÃ£o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
 		
-		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
+		fseek(fp, 0L, SEEK_END);  // percorre atÃ© o fim do arquivo 
 		sz = ftell(fp);           // informa tamanho e armazena em SZ
 		
 	}while(sz<Wanted_size);
@@ -249,40 +249,3 @@ void registra(double registro,FILE *cc, char nome_reg[]){
 	fclose(cc);
 }
 
-
-
-
-
-/* implementar busca de registro especifico
-void localiza_reg(int reg, double count,FILE *fp){
-	double posicao;
-	if( reg < count){
-		posicao= (reg*(67)-1) //tamanho fixo em bits
-		fsetpos()
-		
-		
-	}else
-		printf("\n Valor selecionado fora dos registros do arquivo");
-}
-
-int fflush( FILE * fp )
-int fclose( FILE * fp )
---
-int fseek( FILE * fp, long numbytes, int origin)
-1. ponteiro para o arquivo a ser manipulado
-2. quantidade de bytes a serem deslocados
-3. ponto de referˆencia, em rela¸c˜ao ao qual, o deslocamento ´e realizado.
-Poss´iveis valores:
-Macro Valor Descri¸c˜ao
-SEEK_SET 0 Mover `a partir do in´icio do arquivo
-SEEK_CUR 1 Mover `a partir da posi¸c˜ao atual
-SEEK_END 2 Mover `a partir do final do arquivo
-
---
-int fread( void * buf, int size, int count, FILE * fp )
-int fwrite( void * buf, int size, int count, FILE * fp )
-
----
-fgets()
-
-*/
