@@ -41,8 +41,8 @@ char *randstring(size_t length);						//retorna uma string aleatoria de tamanho 
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
 int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
-void valRegistro(double count,FILE *fp);
-void buscaReg(FILE *fp);									//busca por paginação os registros e imprime na tela com o valor do registro.
+void valRegistro(double count,FILE *fp,char nome_arq[]);
+							
 
 
 int main(int argc, char *argv[]) {
@@ -70,7 +70,6 @@ int main(int argc, char *argv[]) {
 		case 2:	
 		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4 Componente 1 \n5 Componente 2 \n6 Componente 3");
 			scanf("%i",&escolha);
-			buscaReg(fp);
 			//funcao de indexação , incluir relógio
 			break;
 		case 3:
@@ -82,7 +81,7 @@ int main(int argc, char *argv[]) {
 	registra(reg_total,cc,nome_reg); //
  	printf("\nRegistros totais: %1.f",reg_total); 
 	
-	valRegistro(2,fp);  
+	valRegistro(3,fp,nome_arq);  
     
     //Fim da contagem do tempo e computa tempo total.
 	end = clock(); 					//finaliza relogio
@@ -212,11 +211,33 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	return count;
 }
 
-void valRegistro(double count,FILE *fp){
+void valRegistro(double count,FILE *fp,char nome_arq[]){
 	double valRegistro;
-		valRegistro=((count-1)*67); //tamanho fixo em bits
-		printf("\n valor do registro 2 %.0lf",valRegistro);
-	//return valRegistro	
+	//char buff[255];
+	char * buff;
+	int t,size;
+	
+	fp= fopen(nome_arq, "rb");
+	
+	//busca tamanho total do arquivo 
+	fseek (fp , 0 , SEEK_END);
+  	size = ftell (fp);
+  	rewind (fp);
+  	
+	buff= malloc(sizeof(char)*size);	
+	
+	valRegistro=((count-1)*88); //tamanho fixo em bits
+	printf("\n valor do registro %.0f e: %.0lf",count,valRegistro);
+	
+	
+	t = fread (buff,1,size,fp);
+	//fgets(buff)
+	printf("\n valor de t:%i",t);
+	printf("\n\n Buffer: %s",buff);
+	close(fp);
+	free(buff);
+	
+	
 }
 
 void registra(double registro,FILE *cc, char nome_reg[]){
@@ -228,13 +249,7 @@ void registra(double registro,FILE *cc, char nome_reg[]){
 	fclose(cc);
 }
 
-void buscaReg(FILE *fp){
-	void * buf;
-	int t,size,count;
-	t=fread(buf,size,count,fp );
-	printf(buf);
-	
-}
+
 
 
 
