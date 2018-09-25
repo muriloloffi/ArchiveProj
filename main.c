@@ -4,6 +4,7 @@
 #include <time.h>
 #include <time.h>
 #include <conio.h>
+#include "sort.c"
 #include "Lista/Lista.h"
 
 //Constantes Globais
@@ -14,26 +15,26 @@
 
 
 /* TO DO
+implementar leitura para listas
 
-implementar indexa√ß√£o
-localizacao de registro.
+implementar sort salvando em arquivo
 
-secundario - implementar um menu melhorado ! , limpar tela , tecla de saida e loop no menu.
+implementar leitura indexada do arquivo do sort.
 
 */
 
-//Programa criar um arquivo bin e manipula informa√ß√µes usando as fun√ß√µes de escrita e leitura
+//Programa criar um arquivo bin e manipula informaÁıes usando as funÁıes de escrita e leitura
 
 
-//Cria√ß√£o de uma struct de registro
+//CriaÁ„o de uma struct de registro
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
 
 
-//FUN√á√ïES declaradas abaixo est√£o implementadas depois da main!
-int valida(int val);									//confere se n√£o passou de 1gb o tamanho solicitado
+//FUN«’ES declaradas abaixo est„o implementadas depois da main!
+int valida(int val);									//confere se n„o passou de 1gb o tamanho solicitado
 int escolha_tam(); 										//Menu de tamanhos para escolha
 void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
 int rand_fill(); 										//retorna um int aleatorio
@@ -42,7 +43,6 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]);
 int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
 void valRegistro(double count,FILE *fp,char nome_arq[]);
-							
 
 
 int main(int argc, char *argv[]) {
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
  	int wanted_size,q,escolha; 
 	double reg_total; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do rel√≥gio
+	clock_t start, end;						//variaveis do relÛgio
     char nome_arq[] = "./data.bin";
     char nome_reg[] = "./reg.bin";
     		    
@@ -68,16 +68,15 @@ int main(int argc, char *argv[]) {
 			end = clock(); 	
 	 		break;
 		case 2:	
-		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4 Componente 1 \n5 Componente 2 \n6 Componente 3");
+		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
 			scanf("%i",&escolha);
-			//funcao de indexa√ß√£o , incluir rel√≥gio
+			//ler valores do documento
 			break;
 		case 3:
 			ler_tudo(fp,nome_arq);
 			break;
 		
 	}
-	
 	registra(reg_total,cc,nome_reg); //
  	printf("\nRegistros totais: %1.f",reg_total); 
 	
@@ -87,7 +86,7 @@ int main(int argc, char *argv[]) {
 	end = clock(); 					//finaliza relogio
 	printf("\n\n--------------------------------------------------------------");
 	printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado
-    
+    		
     
  }
 
@@ -142,7 +141,7 @@ int valida(int val){
 }
 
 int rand_fill(){
-	//gera valor int aleatorio at√© 9
+	//gera valor int aleatorio atÈ 9
 	int iRand;
 	iRand=(rand() % 9);
 	return iRand;
@@ -168,7 +167,7 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 	fp= fopen(nome_arq, "rb");
   if(fp != NULL)
   {
-  	//percorre arquivo at√© o final imprimindo na tela
+  	//percorre arquivo atÈ o final imprimindo na tela
     while((c = fgetc(fp)) != EOF) putchar(c);
     printf("%\n",c);
     fclose(fp);
@@ -179,7 +178,7 @@ void ler_tudo(FILE *fp,char nome_arq[]){
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	int sz;
 	double count;
-	//Gera os valores aleat√≥rios at√© encher o arquivo
+	//Gera os valores aleatÛrios atÈ encher o arquivo
 	count =0;
 	if (( fp = fopen(nome_arq,"wb+")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
@@ -200,9 +199,9 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 		
 		count++;
 		
-		//printf("\n Inclus√£o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
+		//printf("\n Inclus„o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
 		
-		fseek(fp, 0L, SEEK_END);  // percorre at√© o fim do arquivo 
+		fseek(fp, 0L, SEEK_END);  // percorre atÈ o fim do arquivo 
 		sz = ftell(fp);           // informa tamanho e armazena em SZ
 		
 	}while(sz<Wanted_size);
@@ -234,11 +233,15 @@ void valRegistro(double count,FILE *fp,char nome_arq[]){
 	//fgets(buff)
 	printf("\n valor de t:%i",t);
 	printf("\n\n Buffer: %s",buff);
+	
+	
+	
 	close(fp);
 	free(buff);
 	
 	
 }
+
 
 void registra(double registro,FILE *cc, char nome_reg[]){
 	if (( cc = fopen(nome_reg,"wb+")) == NULL ){	//abre o arquivo
@@ -248,4 +251,34 @@ void registra(double registro,FILE *cc, char nome_reg[]){
 	fprintf(cc,"%.0lf",registro);
 	fclose(cc);
 }
+
+
+/*
+// funcao para passar informaÁıes do buffer para listas
+
+LDE paraLista(char *buffer){
+	LDE lista ;
+	char * ctemp;
+	int posicao=0;
+	
+	//!!conferir o tamanho da inicializaÁ„o da lista.!!!
+	inicializa_lista(lista,);
+	
+	while(buffer =! EOF){
+	
+		putchar(ctemp);
+		
+		//efetua a quebra a cada virgula durante a leitura do buffer
+		if(int strcmp(ctemp, ","))
+					posicao ++;
+		//efetua a quebra a cada \n armazenando em uma nova 			
+		if(int strcmp(ctemp, "\n"))
+					
+		int insereNaPos(lista, ctemp, posicao);
+		
+	}
+	
+}
+*/
+
 

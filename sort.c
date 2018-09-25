@@ -1,60 +1,31 @@
+//funcoes para Ordenação
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h> 
-const int MAX = 1024; 
 
-/* inserts <value> into <sorted> containing <count> values */ 
-void insert_sorted (long *sorted, int count, long value) { 
-int i = 0; 
+// qsort(lista, registros, sizeof(registro),comparador)
+/*
+int int_cmp(const void *a, const void *b) 
+{ 
+    const int *ia = (const int *)a; // casting pointer types 
+    const int *ib = (const int *)b;
+    return *ia  - *ib; 
+	// integer comparison: returns negative if b > a and positive if a > b 
 
-sorted[count] = value;
-if (count == 0) return; 
-	for (i = count;i >= 0; i--) { 
-		if (value < sorted[i-1]) 
-			sorted[i] = sorted[i-1]; 
-		else break; 
-	}
-	sorted[i] = value; 
+} 
+*/
+
+
+/* integer array printing function */ 
+/*
+void print_int_array(const int *array, size_t len) 
+{ 
+    size_t i;
+ 
+    for(i=0; i<len; i++) 
+        printf("%d | ", array[i]);
+ 
+    putchar('\n');
 } 
 
-int main (int argc, char *argv[]) { 
-	FILE *fp = NULL; 
-	long sorted[1024]; 
-	long value; 
-	int count = 0; 
-	int i = 0; 
-	
-	if (argc < 2) { 
-		fprintf (stderr, ""Usage : %s <file_name>\n"", argv[0]); 
-	return 1; 
-	} 
-	
-	fp = fopen (argv[1], ""r""); 
-	
-	if (NULL == fp) { 
-		perror (""fopen""); 
-	return -1; 
-	} 
-	
-	
-	while (!feof (fp)) { 
-		fscanf (fp, ""%ld\n"", &value); /* pega valorese */ 
-		insert_sorted (sorted, count, value); /* sort */ 
-		++count; /* aumenta valor do sort */ 
-	} 	
-
-	
-	printf (""Sorted values : ""); 
-	for (i = 0; i < count; i++ ) { 
-		printf (""%ld "", sorted[i]); 
-	} 
-
-	/* cleanup */ 
-	if (fp) { 
-		fclose (fp); 
-		fp = NULL; 
-	} 
-	return 0; 
-}
-
-
+*/
