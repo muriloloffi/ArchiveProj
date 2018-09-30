@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <time.h>
-#include <conio.h>
-#include "Lista/Lista.h"
+#include "Pilha/Pilha.h"
 
 //Constantes Globais
 #define Giga 1073741824
@@ -14,12 +12,9 @@
 
 
 /* TO DO
-
-implementar indexação
-localizacao de registro.
-
-secundario - implementar um menu melhorado ! , limpar tela , tecla de saida e loop no menu.
-
+implementar leitura para listas
+implementar sort salvando em arquivo
+implementar leitura indexada do arquivo do sort.
 */
 
 //Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
@@ -42,7 +37,8 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]);
 int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
 void valRegistro(double count,FILE *fp,char nome_arq[]);
-							
+void paraFila(char *buffer, int t);
+void mostra(char *);
 
 
 int main(int argc, char *argv[]) {
@@ -68,16 +64,15 @@ int main(int argc, char *argv[]) {
 			end = clock(); 	
 	 		break;
 		case 2:	
-		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4 Componente 1 \n5 Componente 2 \n6 Componente 3");
+		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
 			scanf("%i",&escolha);
-			//funcao de indexação , incluir relógio
+			//ler valores do documento
 			break;
 		case 3:
 			ler_tudo(fp,nome_arq);
 			break;
 		
 	}
-	
 	registra(reg_total,cc,nome_reg); //
  	printf("\nRegistros totais: %1.f",reg_total); 
 	
@@ -87,7 +82,7 @@ int main(int argc, char *argv[]) {
 	end = clock(); 					//finaliza relogio
 	printf("\n\n--------------------------------------------------------------");
 	printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado
-    
+    		
     
  }
 
@@ -163,6 +158,11 @@ char *randstring(size_t tam) {
     return randomString; 									// retorna valor 
 }
 
+void mostra(char *p){
+	printf("%1.c",*p);
+	
+}
+
 void ler_tudo(FILE *fp,char nome_arq[]){
    char c;
 	fp= fopen(nome_arq, "rb");
@@ -213,7 +213,6 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 
 void valRegistro(double count,FILE *fp,char nome_arq[]){
 	double valRegistro;
-	//char buff[255];
 	char * buff;
 	int t,size;
 	
@@ -224,22 +223,26 @@ void valRegistro(double count,FILE *fp,char nome_arq[]){
   	size = ftell (fp);
   	rewind (fp);
   	
-	buff= malloc(sizeof(char)*size);	
+	buff= malloc(sizeof(char)*31);	
 	
-	valRegistro=((count-1)*88); //tamanho fixo em bits
-	printf("\n valor do registro %.0f e: %.0lf",count,valRegistro);
+	valRegistro=((count-1)*89); //tamanho fixo em bits
+	
+	//printf("\n valor do registro %.0f e: %.0lf",count,valRegistro);
 	
 	
 	t = fread (buff,1,size,fp);
 	//fgets(buff)
 	printf("\n valor de t:%i",t);
-	printf("\n\n Buffer: %s",buff);
+	//printf("\n\n Buffer: %s",buff);
+		
 	close(fp);
 	free(buff);
 	
 	
 }
 
+
+//criar arquivo contendo a quantidade de registros inseridos.
 void registra(double registro,FILE *cc, char nome_reg[]){
 	if (( cc = fopen(nome_reg,"wb+")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
@@ -251,38 +254,26 @@ void registra(double registro,FILE *cc, char nome_reg[]){
 
 
 
+// funcao para passar informações do buffer para listas
+void paraPilha(char *buffer, int t){
 
-
-/* implementar busca de registro especifico
-void localiza_reg(int reg, double count,FILE *fp){
-	double posicao;
-	if( reg < count){
-		posicao= (reg*(67)-1) //tamanho fixo em bits
-		fsetpos()
-		
-		
-	}else
-		printf("\n Valor selecionado fora dos registros do arquivo");
+	int tamanho=t;
+	int i;
+	char *temp;
+	void *buf;
+	//!!conferir o tamanho da inicialização da lista.!!!
+	//inicializa_lista(f,tamanho);
+	
+	/*
+	for(i=0;i<t;i++){
+		if(buffer[i]=","){
+			i++;	
+	}else{
+		buf=buffer[i];
+		insereNaPos(f, buf, i);
+		}
+	}	
+	*/	
 }
 
-int fflush( FILE * fp )
-int fclose( FILE * fp )
---
-int fseek( FILE * fp, long numbytes, int origin)
-1. ponteiro para o arquivo a ser manipulado
-2. quantidade de bytes a serem deslocados
-3. ponto de referˆencia, em rela¸c˜ao ao qual, o deslocamento ´e realizado.
-Poss´iveis valores:
-Macro Valor Descri¸c˜ao
-SEEK_SET 0 Mover `a partir do in´icio do arquivo
-SEEK_CUR 1 Mover `a partir da posi¸c˜ao atual
-SEEK_END 2 Mover `a partir do final do arquivo
-
---
-int fread( void * buf, int size, int count, FILE * fp )
-int fwrite( void * buf, int size, int count, FILE * fp )
-
----
-fgets()
-
-*/
+//  while( fgets(line, sizeof(line), fp) != NULL)
