@@ -37,7 +37,7 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]);
 int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
 void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc);
-int leQuantReg(FILE *cc,char nome_reg[]);
+double leQuantReg(FILE *cc,char nome_reg[]);
 void paraFila(char *buffer, int t);
 void mostra(char *);
 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 			start = clock(); 	
 			reg_total=preenche(fp,wanted_size,registro,nome_arq);
 			registra(reg_total,cc,nome_reg);
-			end = clock(); 	
+			end = clock(); 				//finaliza relogio
 	 		break;
 		case 2:	
 		   	printf("\n1: Equipe \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 	
     
     //Fim da contagem do tempo e computa tempo total.
-	end = clock(); 					//finaliza relogio
+	
 	printf("\n\n--------------------------------------------------------------");
 	printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado
     		
@@ -182,30 +182,22 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	double count;
 	//Gera os valores aleatórios até encher o arquivo
 	count =0;
-	if (( fp = fopen(nome_arq,"wb+")) == NULL ){	//abre o arquivo
+	if (( fp = fopen(nome_arq,"wb")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
 	do{
-	/*
+
 		registro.baloes=rand_fill();
 		registro.equipe=randstring(20);
 		registro.erros=rand_fill();
 		registro.nome1=randstring(20);
 		registro.nome2=randstring(20);
 		registro.nome3=randstring(20);
-	*/
-	
-		registro.equipe="equipe";
-	 	registro.erros=4;
-		registro.baloes=1;
-		registro.nome1="nome1";
-		registro.nome2="nome2";
-		registro.nome3="nome3";
+
 
 		//Escreve valores no arquivo
 		fwrite(&registro,sizeof(reg),1,fp);
-		
 		count++;
 		
 		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
@@ -221,11 +213,10 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 
 void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 	double valRegistro;
-	char * buff;
 	int t,size;
 	long pos;
 	int offset; //variavel aponta para endereço no arquivo
-	reg registroleitura;  //leitura para o registro
+	reg registroleitura;  //leitura para o registro8
 	
 	fp= fopen(nome_arq, "rb");
 	if(fp == NULL){
@@ -265,50 +256,64 @@ void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 
 //criar arquivo contendo a quantidade de registros inseridos.
 void registra(double registro,FILE *cc, char nome_reg[]){
-	if (( cc = fopen(nome_reg,"wb+")) == NULL ){	//abre o arquivo
+	if (( cc = fopen(nome_reg,"wb")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
 	fprintf(cc,"%.0lf",registro);
 	fclose(cc);
 }
-int leQuantReg(FILE *cc,char nome_reg[]){
-	int total;
-	if (( cc = fopen(nome_reg,"rb+")) == NULL ){	//abre o arquivo
+
+double leQuantReg(FILE *cc,char nome_reg[]){
+	double total; 
+	char *buffer = NULL;
+   	int string_size, read_size;
+	
+	//testa abertura do arquivo
+	if (( cc = fopen(nome_reg,"rb")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
 	
-	//percorre até o final do arquivo e retorna o tamanho total
-  	
-	fread(&total,sizeof(int),1,cc);
+	//busca final do arquivo
+	fseek(cc, 0, SEEK_END);
+	string_size = ftell(cc);
+	rewind(cc);
 	
-	printf("\nTotal de registros no arquivo: %i",total);
+	//aloca buffer
+	buffer = (char*) malloc(sizeof(char) * (string_size + 1) );
+	
+	//efetua leitura
+	read_size = fread(buffer, sizeof(char), string_size, cc);
+	//marcador de final do buffer
+	buffer[string_size] = '\0';
+	
+	//valida se leitura deu certo
+	if (string_size != read_size)
+       {
+           // Algo deu errado
+           // buffer vira NULL
+           free(buffer);
+           buffer = NULL;
+       }
+       
+	fclose(cc);
+	
+	
+	//converte string para int
+	total= atoi(buffer);
+	
+	//imprime valor
+	printf("\nTotal de registros no arquivo: %.0lf",total);
+	
 	return total;
 }
 
 
 
-// funcao para passar informações do buffer para listas
+// funcao para passar informações do buffer para Pilhas
 void paraPilha(char *buffer, int t){
 
-	int tamanho=t;
-	int i;
-	char *temp;
-	void *buf;
-	//!!conferir o tamanho da inicialização da lista.!!!
-	//inicializa_lista(f,tamanho);
-	
-	/*
-	for(i=0;i<t;i++){
-		if(buffer[i]=","){
-			i++;	
-	}else{
-		buf=buffer[i];
-		insereNaPos(f, buf, i);
-		}
-	}	
-	*/	
+
 }
 
-//  while( fgets(line, sizeof(line), fp) != NULL)
