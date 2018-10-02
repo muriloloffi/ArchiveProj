@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "Pilha/Pilha.h"
+#include "Lista/Lista.h"
 
 //Constantes Globais
 #define Giga 1073741824
@@ -17,18 +17,18 @@ implementar sort salvando em arquivo
 implementar leitura indexada do arquivo do sort.
 */
 
-//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
+//Programa criar um arquivo bin e manipula informaï¿½ï¿½es usando as funï¿½ï¿½es de escrita e leitura
 
 
-//Criação de uma struct de registro
+//Criaï¿½ï¿½o de uma struct de registro
 typedef struct {
 	char *nome1, *nome2, *nome3, *equipe;
 	int baloes, erros;
 }reg;
 
 
-//FUNÇÕES declaradas abaixo estão implementadas depois da main!
-int valida(int val);														//confere se não passou de 1gb o tamanho solicitado
+//FUNï¿½ï¿½ES declaradas abaixo estï¿½o implementadas depois da main!
+int valida(int val);														//confere se nï¿½o passou de 1gb o tamanho solicitado
 int escolha_tam(); 															//Menu de tamanhos para escolha
 void ler_paginacao(FILE *rs,char nome_res[],int paginacao,double registros);	//le conteudo do arquivo de acordo com a paginacao
 int rand_fill(); 															//retorna um int aleatorio
@@ -49,38 +49,43 @@ int main(int argc, char *argv[]) {
  	int wanted_size,q,escolha,total; 
 	double reg_total; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do relógio
+	clock_t start, end;						//variaveis do relï¿½gio
     char nome_arq[] = "./data.bin";
     char nome_reg[] = "./reg.bin";
     char nome_res[] = "./res.bin";
     		    
 	
-								//inicia contagem do tempo
-	escolha=escolhe_menu();					//printa menu e retorna o valor da escolha
-	
-	switch(escolha){
-		case 1:
-			wanted_size=escolha_tam();			//tamano do arquivo
-			start = clock(); 	
-			reg_total=preenche(fp,wanted_size,registro,nome_arq);
-			registra(reg_total,cc,nome_reg);
-			end = clock(); 				//finaliza relogio
-	 		break;
-		case 2:	
-		   	printf("\n1: Equipe \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
-			scanf("%i",&escolha);
-			total = leQuantReg(cc,nome_reg);
-			lerRegistro(total,fp,nome_arq,escolha);
-			break;
-		case 3:
-			printf("\n1: Ler arquivo por paginacao no valor:");
-			scanf("%i",&escolha);
-			total = leQuantReg(cc,nome_reg);
-			int paginacao = escolha;
-			ler_paginacao(rs,nome_res,paginacao,total);
-			break;
-	}
-	 
+											//inicia contagem do tempo
+	while (escolha != 4){
+		escolha=escolhe_menu(); 			//printa menu e retorna o valor da escolha
+		switch(escolha){
+			case 1:
+				wanted_size=escolha_tam();			//tamano do arquivo
+				start = clock(); 	
+				reg_total=preenche(fp,wanted_size,registro,nome_arq);
+				registra(reg_total,cc,nome_reg);
+				end = clock(); 
+				escolha = NULL;				//finaliza relogio
+				break;
+			case 2:	
+				printf("\n1: Equipe \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
+				scanf("%i",&escolha);
+				total = leQuantReg(cc,nome_reg);
+				lerRegistro(total,fp,nome_arq,escolha);
+				break;
+			case 3:
+				printf("\n1: Ler arquivo por paginacao no valor:");
+				scanf("%i",&escolha);
+				total = leQuantReg(cc,nome_reg);
+				int paginacao = escolha;
+				ler_paginacao(rs,nome_res,paginacao,total);
+				break;
+			case 4:
+				printf("Execucao terminada.");
+			default:
+				printf("Valor invÃ¡lido, por favor escolha outra opÃ§Ã£o.");			
+		}
+	} 
     //Fim da contagem do tempo e computa tempo total.
 	
 	printf("\n\n--------------------------------------------------------------");
@@ -124,7 +129,7 @@ int escolha_tam(){
 
 int escolhe_menu(){
 	int escolha;
-	printf("Escolha a opcao desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexacao\n 3: Exibir arquivo \nValor digitado:");
+	printf("Escolha a opcao desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexacao\n 3: Exibir arquivo\n 4: Sair deste programa. \nValor digitado:");
 	scanf("%i",&escolha);
 	return escolha;
 }
@@ -140,7 +145,7 @@ int valida(int val){
 }
 
 int rand_fill(){
-	//gera valor int aleatorio até 9
+	//gera valor int aleatorio atï¿½ 9
 	int iRand;
 	iRand=(rand() % 9);
 	return iRand;
@@ -205,7 +210,7 @@ void ler_paginacao(FILE *rs,char nome_res[],int paginacao,double registros){
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	int sz;
 	double count;
-	//Gera os valores aleatórios até encher o arquivo
+	//Gera os valores aleatï¿½rios atï¿½ encher o arquivo
 	count =0;
 	if (( fp = fopen(nome_arq,"wb")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
@@ -225,9 +230,9 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 		fwrite(&registro,sizeof(reg),1,fp);
 		count++;
 		
-		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
+		//printf("\n Inclusï¿½o: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
 		
-		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
+		fseek(fp, 0L, SEEK_END);  // percorre atï¿½ o fim do arquivo 
 		sz = ftell(fp);           // informa tamanho e armazena em SZ
 		
 	}while(sz<Wanted_size);
@@ -240,7 +245,7 @@ void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 	double valRegistro;
 	int t,size;
 	long pos;
-	int offset; //variavel aponta para endereço no arquivo
+	int offset; //variavel aponta para endereï¿½o no arquivo
 	reg registroleitura;  //leitura para o registro8
 	
 	fp= fopen(nome_arq, "rb");
@@ -336,7 +341,7 @@ double leQuantReg(FILE *cc,char nome_reg[]){
 
 
 
-// funcao para passar informações do buffer para Pilhas
+// funcao para passar informaï¿½ï¿½es do buffer para Pilhas
 void paraPilha(char *buffer, int t){
 
 
