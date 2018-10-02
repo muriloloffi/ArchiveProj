@@ -30,7 +30,7 @@ typedef struct {
 //FUNÇÕES declaradas abaixo estão implementadas depois da main!
 int valida(int val);														//confere se não passou de 1gb o tamanho solicitado
 int escolha_tam(); 															//Menu de tamanhos para escolha
-void ler_tudo(FILE *fp,char nome_arq[]); 									//le todo conteudo do arquivo e imprime na tela
+void ler_paginacao(FILE *rs,char nome_res[],int paginacao,double registros);	//le conteudo do arquivo de acordo com a paginacao
 int rand_fill(); 															//retorna um int aleatorio
 char *randstring(size_t length);											//retorna uma string aleatoria de tamanho espeficado no parametro
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
@@ -44,14 +44,15 @@ void mostra(char *);
 
 int main(int argc, char *argv[]) {
 
-	FILE *fp, *cc; 								//arquivo
+	FILE *fp, *cc , *rs; 								//arquivo
 	char c;								//char
- 	int wanted_size,q,escolha; 
+ 	int wanted_size,q,escolha,total; 
 	double reg_total; 						//int
  	reg registro;						//registros
 	clock_t start, end;						//variaveis do relógio
     char nome_arq[] = "./data.bin";
     char nome_reg[] = "./reg.bin";
+    char nome_res[] = "./res.bin";
     		    
 	
 								//inicia contagem do tempo
@@ -68,17 +69,18 @@ int main(int argc, char *argv[]) {
 		case 2:	
 		   	printf("\n1: Equipe \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
 			scanf("%i",&escolha);
-			int total = leQuantReg(cc,nome_reg);
+			total = leQuantReg(cc,nome_reg);
 			lerRegistro(total,fp,nome_arq,escolha);
 			break;
 		case 3:
-			ler_tudo(fp,nome_arq);
+			printf("\n1: Ler arquivo por paginacao no valor:");
+			scanf("%i",&escolha);
+			total = leQuantReg(cc,nome_reg);
+			int paginacao = escolha;
+			ler_paginacao(rs,nome_res,paginacao,total);
 			break;
 	}
-	 //
- 	//printf("\nRegistros totais: %1.f",reg_total); 
-	
-    
+	 
     //Fim da contagem do tempo e computa tempo total.
 	
 	printf("\n\n--------------------------------------------------------------");
@@ -159,21 +161,44 @@ char *randstring(size_t tam) {
     return randomString; 									// retorna valor 
 }
 
+
 void mostra(char *p){
 	printf("%1.c",*p);
 	
 }
 
-void ler_tudo(FILE *fp,char nome_arq[]){
-   char c;
-	fp= fopen(nome_arq, "rb");
-  if(fp != NULL)
-  {
-  	//percorre arquivo até o final imprimindo na tela
-    while((c = fgetc(fp)) != EOF) putchar(c);
-    printf("%\n",c);
-    fclose(fp);
-  }
+void ler_paginacao(FILE *rs,char nome_res[],int paginacao,double registros){
+  	 reg registroleitura;
+  	 int string_size,i,t;
+  	 //abre o arquivo de resultado
+  	if (( rs = fopen(nome_res,"rb")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	
+	rewind(rs);
+	
+	if(paginacao>registros){
+		paginacao=registros;
+	}
+	t=0;
+	while(t<=registros){
+	
+  		//percorre loop da paginacao e exibe na tela
+    	for(i=1; i<=paginacao;i++) {
+			
+		fread(&registroleitura,sizeof(registroleitura),1,rs);
+		//printf("\n %i, %s, %i , %s, %s, %s, reg: %i   ",registroleitura.baloes,registroleitura.equipe,registroleitura.erros,registroleitura.nome1,registroleitura.nome2,registroleitura.nome3,i);
+		printf("\n %s",registroleitura.equipe);
+		//printf("\n %i, reg: %i   ",registroleitura.baloes,i);	
+		}	
+		//espera imput
+		getchar();
+		t=paginacao + t;
+	}
+	
+    fclose(rs);
+  	
 
 }
 
@@ -230,13 +255,13 @@ void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 	
   	switch(opc){
 		case 1:
-			printf("\n Baloes: %i",registroleitura.baloes);
-			break;
-		case 2:	
 			printf("\n Equipe: %s",registroleitura.equipe);
 			break;
-		case 3:
+		case 2:	
 			printf("\n Erros: %i",registroleitura.erros);
+			break;
+		case 3:
+			printf("\n Baloao: %i",registroleitura.baloes);
 			break;
 		case 4:
 			printf("\n Nome1: %s",registroleitura.nome1);
