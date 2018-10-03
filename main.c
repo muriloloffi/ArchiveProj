@@ -2,25 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <time.h>
-#include <conio.h>
-#include "sort.c"
 #include "Lista/Lista.h"
 
 //Constantes Globais
 #define Giga 1073741824
 #define Mega 1048576
 #define Kilo 1024
-
+#define VALL 20
 
 
 /* TO DO
 implementar leitura para listas
-
 implementar sort salvando em arquivo
-
 implementar leitura indexada do arquivo do sort.
-
 */
 
 //Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
@@ -28,66 +22,73 @@ implementar leitura indexada do arquivo do sort.
 
 //Criação de uma struct de registro
 typedef struct {
-	char *nome1, *nome2, *nome3, *equipe;
+	char nome1[VALL], nome2[VALL], nome3[VALL], equipe[VALL];
 	int baloes, erros;
 }reg;
 
 
 //FUNÇÕES declaradas abaixo estão implementadas depois da main!
-int valida(int val);									//confere se não passou de 1gb o tamanho solicitado
-int escolha_tam(); 										//Menu de tamanhos para escolha
-void ler_tudo(FILE *fp,char nome_arq[]); 				//le todo conteudo do arquivo e imprime na tela
-int rand_fill(); 										//retorna um int aleatorio
-char *randstring(size_t length);						//retorna uma string aleatoria de tamanho espeficado no parametro
+int valida(int val);														//confere se não passou de 1gb o tamanho solicitado
+int escolha_tam(); 															//Menu de tamanhos para escolha
+void ler_paginacao(FILE *rs,char nome_res[],int paginacao,int registros);	//le conteudo do arquivo de acordo com a paginacao
+int rand_fill(); 															//retorna um int aleatorio
+char *randstring(size_t length);											//retorna uma string aleatoria de tamanho espeficado no parametro
 double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
 int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
-void valRegistro(double count,FILE *fp,char nome_arq[]);
+void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc);
+double leQuantReg(FILE *cc,char nome_reg[]);
+void indexar(FILE *fp,char nome_arq[],int total,int index);
+void mostra(char *);
 
 
 int main(int argc, char *argv[]) {
 
-	FILE *fp, *cc; 								//arquivo
+	FILE *fp, *cc , *rs; 								//arquivo
 	char c;								//char
- 	int wanted_size,q,escolha; 
+ 	int wanted_size,q,escolha,total; 
 	double reg_total; 						//int
  	reg registro;						//registros
 	clock_t start, end;						//variaveis do relógio
     char nome_arq[] = "./data.bin";
     char nome_reg[] = "./reg.bin";
+    char nome_res[] = "./res.bin";
     		    
 	
 								//inicia contagem do tempo
-	escolha=escolhe_menu();					//printa menu e retorna o valor da escolha
-	
-	switch(escolha){
-		case 1:
-			wanted_size=escolha_tam();			//tamano do arquivo
-			start = clock(); 	
-			reg_total=preenche(fp,wanted_size,registro,nome_arq);
-			end = clock(); 	
-	 		break;
-		case 2:	
-		   	printf("\n1: Equipes \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
-			scanf("%i",&escolha);
-			//ler valores do documento
-			break;
-		case 3:
-			ler_tudo(fp,nome_arq);
-			break;
-		
+	while (escolha != 4){		
+		escolha=escolhe_menu();					//printa menu e retorna o valor da escolha
+		switch(escolha){
+			case 1:
+				wanted_size=escolha_tam();			//tamano do arquivo
+				start = clock(); 	
+				reg_total=preenche(fp,wanted_size,registro,nome_arq);
+				registra(reg_total,cc,nome_reg);
+				end = clock(); 				//finaliza relogio
+				printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado  
+		 		printf("\n\n--------------------------------------------------------------");
+				 break;
+			case 2:	
+			   	printf("\n1: Equipe \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
+				scanf("%i",&escolha);
+				total = leQuantReg(cc,nome_reg);
+				lerRegistro(total,fp,nome_arq,escolha);
+				break;
+			case 3:
+				printf("\n1: Ler arquivo por paginacao no valor:");
+				scanf("%i",&escolha);
+				total = leQuantReg(cc,nome_reg);
+				ler_paginacao(rs,nome_res,escolha,total);
+				break;
+			case 4:
+				printf("Execucao terminada.");
+			default:
+				printf("Valor inválido, por favor escolha outra opção.");
+		}	  		
 	}
-	registra(reg_total,cc,nome_reg); //
- 	printf("\nRegistros totais: %1.f",reg_total); 
+	//Print do tempo para geração
+		
 	
-	valRegistro(3,fp,nome_arq);  
-    
-    //Fim da contagem do tempo e computa tempo total.
-	end = clock(); 					//finaliza relogio
-	printf("\n\n--------------------------------------------------------------");
-	printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado
-    		
-    
  }
 
 //Menu de selecao do tamanho do arquivo ou valor informado pelo usuario
@@ -125,11 +126,10 @@ int escolha_tam(){
 
 int escolhe_menu(){
 	int escolha;
-	printf("Escolha a opcao desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexacao\n 3: Exibir arquivo \nValor digitado:");
+	printf("Escolha a opcao desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexacao\n 3: Exibir arquivo\n 4: Sair deste programa. \nValor digitado:");
 	scanf("%i",&escolha);
 	return escolha;
 }
-
 
 //funcao que verifica se o tamanho maximo nao ultrapassou o limite de 1 GB
 int valida(int val){
@@ -162,16 +162,42 @@ char *randstring(size_t tam) {
     return randomString; 									// retorna valor 
 }
 
-void ler_tudo(FILE *fp,char nome_arq[]){
-   char c;
-	fp= fopen(nome_arq, "rb");
-  if(fp != NULL)
-  {
-  	//percorre arquivo até o final imprimindo na tela
-    while((c = fgetc(fp)) != EOF) putchar(c);
-    printf("%\n",c);
-    fclose(fp);
-  }
+
+void mostra(char *p){
+	printf("%1.c",*p);
+	
+}
+
+void ler_paginacao(FILE *rs,char nome_res[],int paginacao,int registros){
+  	 reg registroleitura [registros];
+  	 int string_size,i,t;
+  	 //abre o arquivo de resultado
+  	if (( rs = fopen(nome_res,"rb")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	
+	fseek(rs,0,SEEK_SET);
+	
+	//valida o tamanho da paginacao passada.
+	if(paginacao>registros){
+		paginacao=registros;
+	}
+	t=0;
+	while(t<registros){
+	
+  		//percorre loop da paginacao e exibe na tela
+    	for(i=1; i<=paginacao;i++) {	
+			fread(&registroleitura[t],sizeof(reg),1,rs);
+			printf("\n %i, %s, %i , %s, %s, %s, reg: %i ",registroleitura[t].baloes,registroleitura[t].equipe,registroleitura[t].erros,registroleitura[t].nome1,registroleitura[t].nome2,registroleitura[t].nome3,i);
+			t++;
+		}	
+		//espera imput
+		getchar();
+		getchar();
+	}
+	fclose(rs);
+  	
 
 }
 
@@ -180,23 +206,22 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	double count;
 	//Gera os valores aleatórios até encher o arquivo
 	count =0;
-	if (( fp = fopen(nome_arq,"wb+")) == NULL ){	//abre o arquivo
+	if (( fp = fopen(nome_arq,"wb")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
 	do{
-	
+
 		registro.baloes=rand_fill();
-		registro.equipe=randstring(20);
+		strcpy(registro.equipe,randstring(VALL-1)); 
 		registro.erros=rand_fill();
-		registro.nome1=randstring(20);
-		registro.nome2=randstring(20);
-		registro.nome3=randstring(20);
-	
+		strcpy(registro.nome1,randstring(VALL-1));
+		strcpy(registro.nome2,randstring(VALL-1));
+		strcpy(registro.nome3,randstring(VALL-1));
+
 
 		//Escreve valores no arquivo
-		fprintf(fp,"%i,%s,%i,%s,%s,%s\n",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);//imprime todos os valores separados por virgulas e com $separando os registros.
-		
+		fwrite(&registro,sizeof(reg),1,fp);
 		count++;
 		
 		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
@@ -210,41 +235,52 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 	return count;
 }
 
-void valRegistro(double count,FILE *fp,char nome_arq[]){
+void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 	double valRegistro;
-	//char buff[255];
-	char * buff;
 	int t,size;
+	long pos;
+	int offset; //variavel aponta para endereço no arquivo
+	reg registroleitura;  //leitura para o registro8
 	
 	fp= fopen(nome_arq, "rb");
-	
-	//busca tamanho total do arquivo 
-	fseek (fp , 0 , SEEK_END);
-  	size = ftell (fp);
-  	rewind (fp);
+	if(fp == NULL){
+        perror("fopen\n");
+        exit(EXIT_FAILURE);
+    }
+    	
+  	fseek(fp,0,SEEK_SET);
   	
-	buff= malloc(sizeof(char)*size);	
+	fread(&registroleitura,sizeof(reg),1,fp);
 	
-	valRegistro=((count-1)*88); //tamanho fixo em bits
-	printf("\n valor do registro %.0f e: %.0lf",count,valRegistro);
-	
-	
-	t = fread (buff,1,size,fp);
-	//fgets(buff)
-	printf("\n valor de t:%i",t);
-	printf("\n\n Buffer: %s",buff);
-	
-	
-	
+  	switch(opc){
+		case 1:
+			printf("\n Equipe: %s",registroleitura.equipe);
+			break;
+		case 2:	
+			printf("\n Erros: %i",registroleitura.erros);
+			break;
+		case 3:
+			printf("\n Baloao: %i",registroleitura.baloes);
+			break;
+		case 4:
+			printf("\n Nome1: %s",registroleitura.nome1);
+			break;
+		case 5:
+			printf("\n Nome2: %s",registroleitura.nome2);
+			break;
+		case 6:
+			printf("\n Nome3: %s",registroleitura.nome3);
+			break;			
+	}	
 	close(fp);
-	free(buff);
 	
 	
 }
 
 
+//criar arquivo contendo a quantidade de registros inseridos.
 void registra(double registro,FILE *cc, char nome_reg[]){
-	if (( cc = fopen(nome_reg,"wb+")) == NULL ){	//abre o arquivo
+	if (( cc = fopen(nome_reg,"wb")) == NULL ){	//abre o arquivo
  		printf ("Erro na abertura do arquivo");
 		exit (0);
 	}
@@ -252,33 +288,126 @@ void registra(double registro,FILE *cc, char nome_reg[]){
 	fclose(cc);
 }
 
-
-/*
-// funcao para passar informações do buffer para listas
-
-LDE paraLista(char *buffer){
-	LDE lista ;
-	char * ctemp;
-	int posicao=0;
+double leQuantReg(FILE *cc,char nome_reg[]){
+	double total; 
+	char *buffer = NULL;
+   	int string_size, read_size;
 	
-	//!!conferir o tamanho da inicialização da lista.!!!
-	inicializa_lista(lista,);
-	
-	while(buffer =! EOF){
-	
-		putchar(ctemp);
-		
-		//efetua a quebra a cada virgula durante a leitura do buffer
-		if(int strcmp(ctemp, ","))
-					posicao ++;
-		//efetua a quebra a cada \n armazenando em uma nova 			
-		if(int strcmp(ctemp, "\n"))
-					
-		int insereNaPos(lista, ctemp, posicao);
-		
+	//testa abertura do arquivo
+	if (( cc = fopen(nome_reg,"rb")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
 	}
 	
+	//busca final do arquivo
+	fseek(cc, 0, SEEK_END);
+	string_size = ftell(cc);
+	rewind(cc);
+	
+	//aloca buffer
+	buffer = (char*) malloc(sizeof(char) * (string_size + 1) );
+	
+	//efetua leitura
+	read_size = fread(buffer, sizeof(char), string_size, cc);
+	//marcador de final do buffer
+	buffer[string_size] = '\0';
+	
+	//valida se leitura deu certo
+	if (string_size != read_size)
+       {
+           // Algo deu errado
+           // buffer vira NULL
+           free(buffer);
+           buffer = NULL;
+       }
+       
+	fclose(cc);
+	
+	
+	//converte string para int
+	total= atoi(buffer);
+	
+	//imprime valor
+	printf("\nTotal de registros no arquivo: %.0lf",total);
+	
+	return total;
 }
-*/
 
+
+
+// funcao para passar informações do buffer para Pilhas
+void indexar(FILE *fp,char nome_arq[],int total,int index){
+	int lin, col, i, j;
+	int posicao;
+	LDE multi; 
+	reg registroleitura;
+	
+	//inicializa lista multipla
+	inicializa_lista(&multi, sizeof(LDE));
+
+	
+	//abrea arquivo não indexado para leitura
+	fp= fopen(nome_arq, "rb");
+	if(fp == NULL){
+        perror("fopen\n");
+        exit(EXIT_FAILURE);
+    }
+	//vai para posicao inicial
+	fseek(fp,0,SEEK_SET);
+	
+	for(i=0; i<total; i++){
+		LDE sub;
+		inicializa_lista(&sub, sizeof(void));
+		for(j=0; j<col; j++){
+			posicao=fseek(fp,0,SEEK_CUR);
+			fread(&registroleitura,sizeof(reg),1,fp);
+			
+			//veriffica qual o campo do index e insere na fim da sub lista
+			switch(index){
+				case 1:
+				insereNoFim(&sub, &registroleitura.equipe);
+				break;
+			case 2:	
+				insereNoFim(&sub, &registroleitura.erros);
+				break;
+			case 3:
+				insereNoFim(&sub,&registroleitura.baloes);
+				break;
+			case 4:
+				insereNoFim(&sub,&registroleitura.nome1);
+				break;
+			case 5:
+				insereNoFim(&sub,&registroleitura.nome2);
+				break;
+			case 6:
+				insereNoFim(&sub,&registroleitura.nome3);
+				break;			
+			}				
+			//insere posicao em bits do inicio da struct
+			insereNoFim(&sub, &posicao);
+			
+		}
+		insereNoFim(&multi, &sub);
+	}
+	
+	qsort(multi.cabeca.info,total,size_t size, int (*compar)(const void*,const void*)););
+	
+	
+	
+	rs= fopen(nome_res, "Wb");
+	if(rs == NULL){
+        perror("fopen\n");
+        exit(EXIT_FAILURE);
+    }
+    fseek(rs, 0L, SEEK_set);  // percorre até o fim do arquivo 
+    
+    while(sz<Wanted_size){//Escreve valores no arquivo
+		fwrite(&registroleitura,sizeof(reg),1,fp);
+		
+		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
+		
+	}
+	//fecha 
+	fclose(rs);
+}
 
