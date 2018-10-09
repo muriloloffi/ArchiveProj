@@ -38,8 +38,10 @@ int escolhe_menu();
 void registra(double registro,FILE *cc, char nome_reg[]);
 void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc);
 double leQuantReg(FILE *cc,char nome_reg[]);
-void paraLista(FILE *cc,char nome_arq[]);
+void paraLista(FILE *cc,char nome_arq[],int registros,int opc);
 void mostra(char *);
+void bubbleSort(LDE *start);
+void ordenado( LDE multi,char nome_arq[],char nome_res[]);
 
 
 int main(int argc, char *argv[]) {
@@ -224,7 +226,6 @@ double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
 		fwrite(&registro,sizeof(reg),1,fp);
 		count++;
 		
-		//printf("\n Inclusão: %i ,  %i  ,  %s  ,  %s  ,  %s ",registro.baloes,registro.equipe,registro.erros,registro.nome1,registro.nome2,registro.nome3);
 		
 		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
 		sz = ftell(fp);           // informa tamanho e armazena em SZ
@@ -254,22 +255,22 @@ void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 	
   	switch(opc){
 		case 1:
-			printf("\n Equipe: %s",registroleitura.equipe);
+			printf("\n Equipe: %s\n",registroleitura.equipe);
 			break;
 		case 2:	
-			printf("\n Erros: %i",registroleitura.erros);
+			printf("\n Erros: %i\n",registroleitura.erros);
 			break;
 		case 3:
-			printf("\n Baloao: %i",registroleitura.baloes);
+			printf("\n Baloao: %i\n",registroleitura.baloes);
 			break;
 		case 4:
-			printf("\n Nome1: %s",registroleitura.nome1);
+			printf("\n Nome1: %s\n",registroleitura.nome1);
 			break;
 		case 5:
-			printf("\n Nome2: %s",registroleitura.nome2);
+			printf("\n Nome2: %s\n",registroleitura.nome2);
 			break;
 		case 6:
-			printf("\n Nome3: %s",registroleitura.nome3);
+			printf("\n Nome3: %s\n",registroleitura.nome3);
 			break;			
 	}	
 	close(fp);
@@ -336,24 +337,133 @@ double leQuantReg(FILE *cc,char nome_reg[]){
 
 
 // funcao para passar informações do buffer para Pilhas
-void paraLista(FILE *cc,char nome_arq[]){
-	int lin, col, i, j;
+void paraLista(FILE *cc,char nome_arq[],int registros,int opc){
+	int i;
+	int current=0;
+	reg registroleitura;
 	
 	LDE multi; 
 	float x;
 	inicializa_lista(&multi, sizeof(LDE));
 	
-	for(i=0; i<lin; i++){
+	cc= fopen(nome_arq, "rb");
+	if(cc == NULL){
+        perror("fopen\n");
+        exit(EXIT_FAILURE);
+    }
+	
+	
+	
+	for(i=0; i<registros; i++){
 		LDE sub;
 		inicializa_lista(&sub, sizeof(void));
-		for(j=0; j<col; j++){
-			printf("%d, %d: ", i, j);
-			scanf("%f", &x)	;
-			insereNoFim(&sub, &x);
-		}
-		insereNoFim(&multi, &sub);
-	}
-	//qsort(multi,);
+		
+		fseek(cc,current,SEEK_SET);
+  	
+		fread(&registroleitura,sizeof(reg),1,cc);
+		
+		switch(opc){
+		case 1:
+			insereNoInicio(&sub,registroleitura.equipe);
+			break;
+		case 2:	
+			insereNoInicio(&sub,registroleitura.baloes);
+			break;
+		case 3:
+			insereNoInicio(&sub,registroleitura.erros);
+			break;
+		case 4:
+			insereNoInicio(&sub,registroleitura.nome1);
+			break;
+		case 5:
+			insereNoInicio(&sub,registroleitura.nome2);
+			break;
+		case 6:
+			insereNoInicio(&sub,registroleitura.nome3);
+			break;			
+	}	
+		
+		insereNoFim(&sub, &current);
+		
+		current = current +sizeof(reg);
 	
+		
+		insereNoFim(&multi, &sub);
+	
+	}
+	
+	close(cc);
+	
+	bubbleSort(&multi);
+	
+ 	ordenado(&multi),"entrada.dat","saida.dat");
 }
+
+// Sort para lista duplamente encadeada.
+// passar arquivos char nome_arq[],char nome_res
+void bubbleSort(LDE *start) 
+{ 
+    int swapped, i; 
+    struct LDE *ptr1; 
+    struct LDE *lptr = NULL; 
+  
+    // verifica se a lista está vazia
+    if (start == NULL) 
+        return; 
+  
+    do
+    { 
+        swapped = 0; 
+        ptr1 = start; 
+  
+        while (ptr1->next != lptr) 
+        { 
+            if (ptr1->data > ptr1->next->data) 
+            {  
+                swap(ptr1, ptr1->next); 
+                swapped = 1; 
+            } 
+            ptr1 = ptr1->next; 
+        } 
+        lptr = ptr1; 
+    } 
+    while (swapped); 
+} 
+
+void ordenado( LDE multi,char nome_arq[],char nome_res[]){
+	FILE *rs;
+	FILE *fp;
+	
+	int i=0;
+	reg registrorec;
+	void *info;
+	int *posregistro;
+	
+	if (( fp = fopen(nome_arq,"rb")) == NULL ){	//abre o arquivo fp
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	
+	if (( rs = fopen(nome_res,"wb")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	for(i=0;i<registros;i++){
+		leNaPos(&multi,info, i);
+		leNaPos(info,posregistro,1);
+		
+		//pega posicao da informação
+		fseek(fp,(*posregistro)*sizeof(reg),SEEK_SET);
+		//recupera o registro
+		fread(&registrorec,sizeof(reg),1,fp);
+		
+		//escreve informação recuperada no arquivo rs
+		fwrite(&registrorec,sizeof(reg),1,rs);
+	}
+	
+	fclose(rs);
+	fclose(fp);
+}
+	
+	
 
