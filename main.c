@@ -278,7 +278,6 @@ void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
 	
 }
 
-
 //criar arquivo contendo a quantidade de registros inseridos.
 void registra(double registro,FILE *cc, char nome_reg[]){
 	if (( cc = fopen(nome_reg,"wb")) == NULL ){	//abre o arquivo
@@ -333,8 +332,6 @@ double leQuantReg(FILE *cc,char nome_reg[]){
 	
 	return total;
 }
-
-
 
 // funcao para passar informações do buffer para Pilhas
 void paraLista(FILE *cc,char nome_arq[],int registros,int opc){
