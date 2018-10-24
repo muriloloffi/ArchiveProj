@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "Lista/Lista.h"
+#include "Arvore.c"
 
 //Constantes Globais
 #define Giga 1073741824
@@ -11,14 +11,21 @@
 #define VALL 20
 
 
-/* TO DO
-implementar leitura para listas
-implementar sort salvando em arquivo
-implementar leitura indexada do arquivo do sort.
+/*
+4- O programa a ser desenvolvido deve permitir ao usu´ario:
+ 4.1 Escolher o campo de indexa¸c˜ao, a partir de uma lista de op¸c˜oes
+  (que podem incluir chaves compostas se necess´ario)
+ 4.2 Uma tabela de ´indices = lista de endere¸cos (em bytes) que
+  referenciam os registros ordenadamente, deve ser gerada para a
+  escolha definida pelo usu´ario. Um endere¸co de um registro ´e o
+  n´umero de bytes que s˜ao necess´arios serem deslocados para se
+  acessar aquela informa¸c˜ao;
+ 4.3 Permitir a inclus˜ao, consulta e exclus˜ao de registros mesmo ap´os
+  a constru¸c˜ao do arquivo indexado (neste caso = reindexar)
+ 4.4 Visualizar uma listagem (paginada) dos dados indexados
+  (percurso in-ordem) resultantes em um arquivo texto de sa´ida;
+ 4.5 Exibir ao final do processo o tempo gasto para o processamento.
 */
-
-//Programa criar um arquivo bin e manipula informações usando as funções de escrita e leitura
-
 
 //Criação de uma struct de registro
 typedef struct {
@@ -33,15 +40,13 @@ int escolha_tam(); 															//Menu de tamanhos para escolha
 void ler_paginacao(FILE *rs,char nome_res[],int paginacao,int registros);	//le conteudo do arquivo de acordo com a paginacao
 int rand_fill(); 															//retorna um int aleatorio
 char *randstring(size_t length);											//retorna uma string aleatoria de tamanho espeficado no parametro
-double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]); 
-int escolhe_menu();
-void registra(double registro,FILE *cc, char nome_reg[]);
-void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc);
-double leQuantReg(FILE *cc,char nome_reg[]);
-void paraLista(FILE *cc,char nome_arq[],int registros,int opc);
-void mostra(char *);
-void bubbleSort(LDE *start);
-void ordenado( LDE multi,char nome_arq[],char nome_res[]);
+double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]);     //preenche os arquivo com dados
+int escolhe_menu();															//printa menu
+void registra(double registro,FILE *cc, char nome_reg[]);					//grava quantidade total de registros no arquivo "./reg.bin"
+void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc);				//Le o valor de um campo do registro
+double leQuantReg(FILE *cc,char nome_reg[]);								// Recupera quantidade de registros do arquivo reg.bin             
+
+
 
 
 int main(int argc, char *argv[]) {
@@ -75,12 +80,12 @@ int main(int argc, char *argv[]) {
 				scanf("%i",&escolha);
 				total = leQuantReg(cc,nome_reg);
 				lerRegistro(total,fp,nome_arq,escolha);
-				break;
+				// ordenar em uma pilha os valores ordenados, e depois inserir a posição da memória dele em uma arvore			break;
 			case 3:
 				printf("\n1: Ler arquivo por paginacao no valor:");
 				scanf("%i",&escolha);
 				total = leQuantReg(cc,nome_reg);
-				ler_paginacao(rs,nome_res,escolha,total);
+				
 				break;
 			case 4:
 				printf("Execucao terminada.");
@@ -333,134 +338,11 @@ double leQuantReg(FILE *cc,char nome_reg[]){
 	return total;
 }
 
-// funcao para passar informações do buffer para Pilhas
-void paraLista(FILE *cc,char nome_arq[],int registros,int opc){
-	int i;
-	int current=0;
-	reg registroleitura;
-	
-	LDE multi; 
-	float x;
-	inicializa_lista(&multi, sizeof(LDE));
-	
-	cc= fopen(nome_arq, "rb");
-	if(cc == NULL){
-        perror("fopen\n");
-        exit(EXIT_FAILURE);
-    }
-	
-	
-	
-	for(i=0; i<registros; i++){
-		LDE sub;
-		inicializa_lista(&sub, sizeof(void));
+void indices (FILE *cc,char nome){
 		
-		fseek(cc,current,SEEK_SET);
-  	
-		fread(&registroleitura,sizeof(reg),1,cc);
-		
-		switch(opc){
-		case 1:
-			insereNoInicio(&sub,registroleitura.equipe);
-			break;
-		case 2:	
-			insereNoInicio(&sub,registroleitura.baloes);
-			break;
-		case 3:
-			insereNoInicio(&sub,registroleitura.erros);
-			break;
-		case 4:
-			insereNoInicio(&sub,registroleitura.nome1);
-			break;
-		case 5:
-			insereNoInicio(&sub,registroleitura.nome2);
-			break;
-		case 6:
-			insereNoInicio(&sub,registroleitura.nome3);
-			break;			
-	}	
-		
-		insereNoFim(&sub, &current);
-		
-		current = current +sizeof(reg);
-	
-		
-		insereNoFim(&multi, &sub);
 	
 	}
-	
-	close(cc);
-	
-	bubbleSort(&multi);
-	
- 	ordenado(&multi),"entrada.dat","saida.dat");
-}
 
-// Sort para lista duplamente encadeada.
-// passar arquivos char nome_arq[],char nome_res
-void bubbleSort(LDE *start) 
-{ 
-    int swapped, i; 
-    struct LDE *ptr1; 
-    struct LDE *lptr = NULL; 
-  
-    // verifica se a lista está vazia
-    if (start == NULL) 
-        return; 
-  
-    do
-    { 
-        swapped = 0; 
-        ptr1 = start; 
-  
-        while (ptr1->next != lptr) 
-        { 
-            if (ptr1->data > ptr1->next->data) 
-            {  
-                swap(ptr1, ptr1->next); 
-                swapped = 1; 
-            } 
-            ptr1 = ptr1->next; 
-        } 
-        lptr = ptr1; 
-    } 
-    while (swapped); 
-} 
 
-void ordenado( LDE multi,char nome_arq[],char nome_res[]){
-	FILE *rs;
-	FILE *fp;
-	
-	int i=0;
-	reg registrorec;
-	void *info;
-	int *posregistro;
-	
-	if (( fp = fopen(nome_arq,"rb")) == NULL ){	//abre o arquivo fp
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
-	}
-	
-	if (( rs = fopen(nome_res,"wb")) == NULL ){	//abre o arquivo
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
-	}
-	for(i=0;i<registros;i++){
-		leNaPos(&multi,info, i);
-		leNaPos(info,posregistro,1);
-		
-		//pega posicao da informação
-		fseek(fp,(*posregistro)*sizeof(reg),SEEK_SET);
-		//recupera o registro
-		fread(&registrorec,sizeof(reg),1,fp);
-		
-		//escreve informação recuperada no arquivo rs
-		fwrite(&registrorec,sizeof(reg),1,rs);
-	}
-	
-	fclose(rs);
-	fclose(fp);
-}
-	
-	
+
 
