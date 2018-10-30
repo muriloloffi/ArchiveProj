@@ -22,7 +22,7 @@
   acessar aquela informa¸c˜ao;
  4.3 Permitir a inclus˜ao, consulta e exclus˜ao de registros mesmo ap´os
   a constru¸c˜ao do arquivo indexado (neste caso = reindexar)
- 4.4 Visualizar uma listagem (paginada) dos dados indexados
+ 4.4 Visualizar uma listagem (paginada) dos dados indexadsos
   (percurso in-ordem) resultantes em um arquivo texto de sa´ida;
  4.5 Exibir ao final do processo o tempo gasto para o processamento.
 */
@@ -32,6 +32,15 @@ typedef struct {
 	char nome1[VALL], nome2[VALL], nome3[VALL], equipe[VALL];
 	int baloes, erros;
 }reg;
+
+typedef struct{
+		int count;               // Number of keys stored in the current node
+        reg valor[MAX_CHAVES];   // Warning: indexing starts at 0, not 1
+        long branch[MAX_FILHOS];   // Fake pointers to child nodes
+    } Node;
+
+
+\\ struct para nó , arvore , 
 
 
 //FUNÇÕES declaradas abaixo estão implementadas depois da main!
@@ -342,6 +351,7 @@ void indices (FILE *cc,char nome){
 		
 	
 	}
+
 
 
 
