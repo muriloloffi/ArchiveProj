@@ -8,9 +8,6 @@
 #define MAX_FILHOS 2*T // qtde max de filhos
 #define MIN_OCUP T-1  // ocupacao min em cada no
 
-
-
-
 typedef struct no_arvoreB arvoreB;
 
 struct no_arvoreB {

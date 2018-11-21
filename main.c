@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
+#include "arvore.h"
 #include <time.h>
-#include "Arvore.c"
 
 //Constantes Globais
 #define Giga 1073741824
@@ -11,348 +12,340 @@
 #define VALL 20
 
 
-/*
-4- O programa a ser desenvolvido deve permitir ao usu´ario:
- 4.1 Escolher o campo de indexa¸c˜ao, a partir de uma lista de op¸c˜oes
-  (que podem incluir chaves compostas se necess´ario)
- 4.2 Uma tabela de ´indices = lista de endere¸cos (em bytes) que
-  referenciam os registros ordenadamente, deve ser gerada para a
-  escolha definida pelo usu´ario. Um endere¸co de um registro ´e o
-  n´umero de bytes que s˜ao necess´arios serem deslocados para se
-  acessar aquela informa¸c˜ao;
- 4.3 Permitir a inclus˜ao, consulta e exclus˜ao de registros mesmo ap´os
-  a constru¸c˜ao do arquivo indexado (neste caso = reindexar)
- 4.4 Visualizar uma listagem (paginada) dos dados indexadsos
-  (percurso in-ordem) resultantes em um arquivo texto de sa´ida;
- 4.5 Exibir ao final do processo o tempo gasto para o processamento.
-*/
-
-//Criação de uma struct de registro
 typedef struct {
 	char nome1[VALL], nome2[VALL], nome3[VALL], equipe[VALL];
 	int baloes, erros;
-}reg;
+} Registro;
 
-typedef struct{
-		int count;               // Number of keys stored in the current node
-        reg valor[MAX_CHAVES];   // Warning: indexing starts at 0, not 1
-        long branch[MAX_FILHOS];   // Fake pointers to child nodes
-    } Node;
+void Inicializa(Apontador *Ap1, Apontador *Ap2, Indice *IndAux, Registro *RegAux) {
+	*Ap1 = *Ap2 = NULL;
+	if(!(IndAux = (Indice*) malloc(sizeof(Indice)))) exit(1);
+	if(!(RegAux = (Registro*) malloc(sizeof(Registro)))) exit(1);
+}
+
+long InsereArquivoPrincipal(FILE *arquivoPrincipal, Registro RegAux) {
+
+	long posAux;
+
+	//Abre o arquivo para atualizacao (leitura e escrita) por causa do parametro "a+b".
+	if(!(arquivoPrincipal = fopen("arquivoPrincipal", "a+b"))) {
+		printf("Erro ao abrir arquivo principal.\n");
+		system("pause");
+		return 1;
+	}
+
+	//permite a leitura e escrita randomica, neste caso partindo do final do file de 0 em 0 bytes
+	fseek(arquivoPrincipal, 0, SEEK_END);
+
+	//retorna a posicao corrente de leitura ou escrita no arquivo (em bytes), ou seja,
+	//ira retornar quantos bytes o arquivo possui
+	posAux = ftell(arquivoPrincipal);
+
+	fwrite(&RegAux, sizeof(Registro), 1, arquivoPrincipal);  //o fwrite permite escrever uma estrutura definida pelo programador
+	//os paremtros são os dados a serem gravados, o tamanho dos dados,
+	// a qtd de unidades a serem gravadas e o ponteiro para o arquivo.
+	//a funcao retorna um int. se o retorno for != da qtd de unidades entao é erro na escrita.(VERIFICAR)
+
+	fclose(arquivoPrincipal);
+
+	return(posAux);
+}
+
+void carregaArquivoIndice(FILE *arquivoIndice, Apontador *Ap1, Apontador *Ap2, int *qntRegistros) {
+
+	Indice IndAux;
+
+	if(!(arquivoIndice = fopen("arquivoIndiceNome", "rb"))) {  //Deve ser usado para abrir arquivos que nao sao do tipo texto "rb"
+		printf("Erro ao abrir arquivo indice.\n");
+		system("pause");
+		return;
+	}
+
+	while(!(feof(arquivoIndice))) {
+		fread(&IndAux, sizeof(Indice), 1, arquivoIndice);
+		if(feof(arquivoIndice)) break;
+		InsereArvore(IndAux, &*Ap1, 1);
+		(*qntRegistros)++;
+	}
+
+	fclose(arquivoIndice);
+
+	if(!(arquivoIndice = fopen("arquivoIndiceTelefone", "rb"))) {  //Deve ser usado para abrir arquivos que nao sao do tipo texto "rb"
+		printf("Erro ao abrir arquivo indice.\n");
+		system("pause");
+		return;
+	}
+
+	while(!(feof(arquivoIndice))) {
+		fread(&IndAux, sizeof(Indice), 1, arquivoIndice);
+		if(feof(arquivoIndice)) break;
+		InsereArvore(IndAux, &*Ap2, 2);
+		(*qntRegistros)++;
+	}
+
+	fclose(arquivoIndice);
+}
+
+void salvaArquivoIndice(FILE *arquivoIndice, Pagina *Ap) {
+
+	int i;
+
+	if(Ap != NULL) {
+		for(i=0; i<Ap->n; i++) {
+			salvaArquivoIndice(arquivoIndice, Ap->p[i]);
+			fwrite(&Ap->r[i], sizeof(Indice), 1, arquivoIndice);
+		}
+		salvaArquivoIndice(arquivoIndice, Ap->p[i]);
+	}
+
+}
+
+Registro pegaRegistroArquivoPrincipal(FILE *arquivoPrincipal, long pos) {
+
+	Registro RegAux;
+
+	if(!(arquivoPrincipal = fopen("arquivoPrincipal", "rb"))) {
+		printf("Erro ao abrir arquivo principal.\n");
+		system("pause");
+		EXIT_FAILURE;
+	}
+
+	fseek(arquivoPrincipal, pos, SEEK_SET);
+
+	fread(&RegAux, sizeof(Registro), 1, arquivoPrincipal);
+
+	fclose(arquivoPrincipal);
+
+	return(RegAux);
+}
+
+void imprimeRegistro(FILE *arquivoPrincipal, Indice *Ind) {
+
+	Registro RegAux;
+
+	if(Ind==NULL) {
+		printf("Erro: Pessoa nao Encontrada.\n");
+		return;
+	}
+
+	RegAux = pegaRegistroArquivoPrincipal(arquivoPrincipal, Ind->posicao);  //abre o arquivo principal com o indice que veio da busca feita em um das arvores para que seja feita a impressao do conteudo existente
+
+	printf("\tNome Completo: %s", RegAux.nomeCompleto);
+	printf("\tData Nascimento: %s", RegAux.dataNascimento);
+	printf("\tCPF: %ld\n", RegAux.cPF);
+	printf("\tEndereco: %s", RegAux.endereco);
+	printf("\tProfissao: %s", RegAux.profissao);
+	printf("\tEmail: %s", RegAux.email);
+	printf("\tTelefone Residencial: %ld\n", RegAux.telResidencial);
+	printf("\tTelefone Celular: %ld\n", RegAux.telCelular);
+	printf("\tTelefone Comercial: %ld\n\n", RegAux.telComercial);
 
 
-\\ struct para nó , arvore , 
+}
 
+void imprimeTodosRegistros(FILE *arquivoPrincipal, Apontador Ap) {
 
-//FUNÇÕES declaradas abaixo estão implementadas depois da main!
-int valida(int val);														//confere se não passou de 1gb o tamanho solicitado
-int escolha_tam(); 															//Menu de tamanhos para escolha
-void ler_paginacao(FILE *rs,char nome_res[],int paginacao,int registros);	//le conteudo do arquivo de acordo com a paginacao
-int rand_fill(); 															//retorna um int aleatorio
-char *randstring(size_t length);											//retorna uma string aleatoria de tamanho espeficado no parametro
-double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]);     //preenche os arquivo com dados
-int escolhe_menu();															//printa menu
-void registra(double registro,FILE *cc, char nome_reg[]);					//grava quantidade total de registros no arquivo "./reg.bin"
-void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc);				//Le o valor de um campo do registro
-double leQuantReg(FILE *cc,char nome_reg[]);								// Recupera quantidade de registros do arquivo reg.bin             
+	int i;
 
+	if(Ap != NULL) {  //Veriicando se a arvore nao esta vazia
+		for(i=0; i<Ap->n; i++) { 			 //dentro da estrutura de um apopntador tem uma var int chamada n
+			imprimeTodosRegistros(arquivoPrincipal, Ap->p[i]);
+			imprimeRegistro(arquivoPrincipal, &Ap->r[i]);
+		}
+		imprimeTodosRegistros(arquivoPrincipal, Ap->p[i]);
+	}
+}
 
+void imprimeTodosRegistrosStr(FILE *arquivoPrincipal, Apontador Ap, const char *str) {
 
+	int i;
+	int aux;
+	String x;
+
+	if(Ap != NULL) {  //Veriicando se a arvore nao esta vazia
+		for(i=0; i<Ap->n; i++) { 			 //dentro da estrutura de um apopntador tem uma var int chamada n
+			imprimeTodosRegistros(arquivoPrincipal, Ap->p[i]);
+			strcpy(x, Ap->r[i].nomeCompleto);
+			aux = strlen(x);
+			x[aux-1] = '\0';
+			if(StartsWith(x, str)) { // procura por uma substring numa string
+				imprimeRegistro(arquivoPrincipal, &Ap->r[i]);
+
+			}
+		}
+		imprimeTodosRegistros(arquivoPrincipal, Ap->p[i]);
+	}
+}
+
+void editaRegistro(FILE *arquivoPrincipal, Indice *Ind1, Indice *Ind2, Apontador *Ap1, Apontador *Ap2) {
+
+	Registro RegAux;
+	Indice IndAux;
+
+	if(Ind1==NULL || Ind2==NULL) {  //esses indices sao utilizados para saber se o contato existe nas duas arvores diferentes
+		printf("Erro: Contato nao encontrado.\n");
+		system("pause");
+		return;
+	}
+
+	imprimeRegistro(arquivoPrincipal, Ind1);  //a busca poderia ser feita por qualquer que seja o Ind(Ind1 ou Ind 2) já que os dois precisam existir
+
+	Retira(*Ind1, &*Ap1, 1);
+	Retira(*Ind2, &*Ap2, 2);
+
+	leRegistroUsuario(&RegAux);
+
+	strcpy(IndAux.nomeCompleto, RegAux.nomeCompleto);
+	IndAux.telCelular = RegAux.telCelular;
+
+	IndAux.posicao = InsereArquivoPrincipal(arquivoPrincipal, RegAux);
+
+	InsereArvore(IndAux, &*Ap1, 1);
+	InsereArvore(IndAux, &*Ap2, 2);
+
+}
+
+void retiraRegistroArquivoPrincipal(FILE *arquivoPrincipal, Indice *Ind) {
+
+	Registro RegAux;
+
+	if(Ind == NULL) {       //se o indice que veio do metodo PesquisaArvore for Null...
+		printf("Nao foi possivel retirar o contato da agenda (arquivo principal.)\n");
+		system("pause");
+		return;
+	}
+
+	if(!(arquivoPrincipal = fopen("arquivoPrincipal", "r+b"))) {
+		printf("Erro ao abrir arquivo principal.\n");
+		system("pause");
+		return;
+	}
+
+	RegAux.telCelular = -1;
+
+	fseek(arquivoPrincipal, Ind->posicao, SEEK_SET); //seek_set é uma constante que indica que a acao deve ser tomada a partir do arquivo
+	fwrite(&RegAux, sizeof(Registro), 1, arquivoPrincipal); //leia-se: escreva o conteudo &RegAux, que é o tamanho tal, sendo que é apenas uma unidade deste, no arquivo principal
+
+	fclose(arquivoPrincipal);
+
+}
 
 int main(int argc, char *argv[]) {
 
 	FILE *fp, *cc , *rs; 								//arquivo
 	char c;								//char
- 	int wanted_size,q,escolha,total; 
+ 	int paginacao;
 	double reg_total; 						//int
  	reg registro;						//registros
-	clock_t start, end;						//variaveis do relógio
-    char nome_arq[] = "./data.bin";
-    char nome_reg[] = "./reg.bin";
-    char nome_res[] = "./res.bin";
-    		    
-	
-								//inicia contagem do tempo
-	while (escolha != 4){		
-		escolha=escolhe_menu();					//printa menu e retorna o valor da escolha
-		switch(escolha){
-			case 1:
-				wanted_size=escolha_tam();			//tamano do arquivo
-				start = clock(); 	
-				reg_total=preenche(fp,wanted_size,registro,nome_arq);
-				registra(reg_total,cc,nome_reg);
-				end = clock(); 				//finaliza relogio
-				printf("\nTempo utilizado: %.10f\n",(((double)(end-start)/CLOCKS_PER_SEC))); // print do tempo utilizado  
-		 		printf("\n\n--------------------------------------------------------------");
-				 break;
-			case 2:	
-			   	printf("\n1: Equipe \n2: Erros \n3: Balao \n4: Componente 1 \n5: Componente 2 \n6: Componente 3\nValor digitado:");
+//-----------------------------------------------------------
+	int x;
+	char opt='1';
+	String strAux;
+	Indice IndAux;
+	Registro RegAux;
+	Pagina *Ap1, *Ap2;    //criacao de 2 apontadores do tipo pagina para guardar tipos de diferentes de dados
+	int qntRegistros=0;
+	Indice *IndX, *IndY;
+	FILE *arquivoIndice;
+	FILE *arquivoPrincipal;
+
+
+	Inicializa(&Ap1, &Ap2, &IndAux, &RegAux);    //reserva espaço para cada variável usando malloc
+
+	carregaArquivoIndice(arquivoIndice, &Ap1, &Ap2, &qntRegistros); //Abertura  de arquivos e leitura até seu final chamando o metodo insereArvore
+
+	while(1) {
+		system("cls");
+		printf("1 - Gerar arquivo \n");
+		printf("2 - Gerar arvore indexada");
+		printf("3 - Imprimir todos os registros por paginação\n");
+		printf("0 - Sair\n");
+		fflush(stdin);
+		scanf("%c", &opt);
+		if(opt=='0') break;
+		switch(opt) {
+			case '1':
+				system("cls");
+				printf("Gerar arquivo");
+				printf("/n Informe o tamanho desejado");
+				printf("\nEscolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\nValor digitado:");
 				scanf("%i",&escolha);
-				total = leQuantReg(cc,nome_reg);
-				lerRegistro(total,fp,nome_arq,escolha);
-				// ordenar em uma pilha os valores ordenados, e depois inserir a posição da memória dele em uma arvore			break;
-			case 3:
-				printf("\n1: Ler arquivo por paginacao no valor:");
-				scanf("%i",&escolha);
-				total = leQuantReg(cc,nome_reg);
-				
+				fflush(stdin);  										// limpa o buffer do teclado no windows
+				gerador(escolha);						     // cria arquivo no tamanho especificado
 				break;
-			case 4:
-				printf("Execucao terminada.");
+			case '2':
+				system("cls");
+				printf("Indexar para arvore ");
+				printf("Digite o campo que deseja indexar ");
+				// implementação para arvore
+				/*
+				IndAux.posicao = InsereArquivoPrincipal(arquivoPrincipal, RegAux);    //vai salvar a estrutura principal no arquivo principal
+				if(InsereArvore(IndAux, &Ap1, 1) && InsereArvore(IndAux, &Ap2, 2))    //passo a copia do nome e do telefone como param. O ponteiro Ap1 e Ap2 já estao prontos pois passaram pelo metodo carregaArquivoIndice
+					qntRegistros++;
+				*/
+				break;
+			case '3':
+				system("cls");
+				printf("Imprimir por paginacao");
+				printf("\nInforme o tamanho da paginação: ");
+				fgets();
+				fflush(stdin);
+				
+				
+				
+				printf("\n");
+				if(strcmpi(strAux, "nome\n")==0) {
+					printf("Quantidade total de Contatos: %d\n\n", qntRegistros);
+					imprimeTodosRegistros(arquivoPrincipal, Ap2);
+				} else if(strcmpi(strAux, "codigo\n")==0) {
+					printf("Quantidade total de exemplares: %d\n\n", qntRegistros);
+					imprimeTodosRegistros(arquivoPrincipal, Ap1);
+				} else {
+					printf("Nao eh possivel imprimir por %s", strAux);
+					system("pause");
+					break;
+				}
+				system("pause");
+				break;
+				
+				fflush(stdin);
+
+				scanf("%s", &strAux);
+				imprimeTodosRegistrosStr(arquivoPrincipal, Ap2, strAux );  //a busca é sempre feita pelo nome ou pedaco dele
+				system("pause");
+				break;
+
+
 			default:
-				printf("Valor inválido, por favor escolha outra opção.");
-		}	  		
-	}
-	//Print do tempo para geração
-		
-	
- }
-
-//Menu de selecao do tamanho do arquivo ou valor informado pelo usuario
-int escolha_tam(){
-	int escolha,val;
-	printf("\nEscolha o tamanho do arquivo:\n 1: 1KB\n 2: 1MB\n 3: 1GB\n 4: Tamanho desejado\nValor digitado:");
-	scanf("%i",&escolha);
-	switch(escolha){
-	 	case 1:
-	 		val = Kilo; //1KB
-	 		break;
-		case 2:
-			val = Mega; //1 MB
-			break;
-		case 3:
-			val= Giga; //1GB
-			break;
-		case 4:
-			printf("Informe o tamanho do arquivo em bytes:");
-			scanf("%i",&escolha);
-			if(valida(escolha)==0){
-				val=escolha;
-			}else{
-				printf("\nCriado com 1 registro!");
-				val=1;
-			}
-			break;	
-		default:
-			val= 1;
-			break; 	
-	 }
-	 
-	return val;
-}
-
-int escolhe_menu(){
-	int escolha;
-	printf("Escolha a opcao desejada no menu:\n 1: Criar arquivo \n 2: Escolha o campo de indexacao\n 3: Exibir arquivo\n 4: Sair deste programa. \nValor digitado:");
-	scanf("%i",&escolha);
-	return escolha;
-}
-
-//funcao que verifica se o tamanho maximo nao ultrapassou o limite de 1 GB
-int valida(int val){
-	if(val>Giga){
-		printf("\nArquivo ultrapassa o tamanho maximo de registros +1GB!\n");
-		return 1;
-	}
-	return 0;
-}
-
-int rand_fill(){
-	//gera valor int aleatorio até 9
-	int iRand;
-	iRand=(rand() % 9);
-	return iRand;
-}
-
-char *randstring(size_t tam) {
-	int n;
-    static char charset[] = "abcdefghijklmnopqrstuvwxyz"; 	//lista de chars possiveis  
-    char *randomString = NULL; //string
-
-    randomString = malloc(sizeof(char) * (tam +1));         //aloca tamanho da string  
-    for ( n = 0;n < tam;n++) {    							//for do tamanho         
-    	int key = rand() % (int)(sizeof(charset) -1); 		//pega um int do tamanho da lista
-		randomString[n] = charset[key];  					// a string recebe o char na posicao aleatoria sorteada acima
-    }
-
-    randomString[tam] = '\0'; 								//final da string
-    return randomString; 									// retorna valor 
-}
-
-
-void mostra(char *p){
-	printf("%1.c",*p);
-	
-}
-
-void ler_paginacao(FILE *rs,char nome_res[],int paginacao,int registros){
-  	 reg registroleitura [registros];
-  	 int string_size,i,t;
-  	 //abre o arquivo de resultado
-  	if (( rs = fopen(nome_res,"rb")) == NULL ){	//abre o arquivo
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
+				system("cls");
+				printf("AGENDA DE CONTATOS");
+				printf("Opcao invalida!\n");
+				system("pause");
+		}
 	}
 	
-	fseek(rs,0,SEEK_SET);
-	
-	//valida o tamanho da paginacao passada.
-	if(paginacao>registros){
-		paginacao=registros;
-	}
-	t=0;
-	while(t<registros){
-	
-  		//percorre loop da paginacao e exibe na tela
-    	for(i=1; i<=paginacao;i++) {	
-			fread(&registroleitura[t],sizeof(reg),1,rs);
-			printf("\n %i, %s, %i , %s, %s, %s, reg: %i ",registroleitura[t].baloes,registroleitura[t].equipe,registroleitura[t].erros,registroleitura[t].nome1,registroleitura[t].nome2,registroleitura[t].nome3,i);
-			t++;
-		}	
-		//espera imput
-		getchar();
-		getchar();
-	}
-	fclose(rs);
-  	
 
+	if(!(arquivoIndice = fopen("arquivoIndiceNome", "wb"))) {
+		printf("Erro ao abrir arquivo indice.\n");
+		system("pause");
+		return;
+	}
+
+	salvaArquivoIndice(arquivoIndice, Ap1);
+
+	fclose(arquivoIndice);
+
+	if(!(arquivoIndice = fopen("arquivoIndiceTelefone", "wb"))) {
+		printf("Erro ao abrir arquivo indice.\n");
+		system("pause");
+		return;
+	}
+
+	salvaArquivoIndice(arquivoIndice, Ap2);
+
+	fclose(arquivoIndice);
+
+	return(0);
 }
-
-double preenche(FILE *fp,int Wanted_size,reg registro,char nome_arq[]){
-	int sz;
-	double count;
-	//Gera os valores aleatórios até encher o arquivo
-	count =0;
-	if (( fp = fopen(nome_arq,"wb")) == NULL ){	//abre o arquivo
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
-	}
-	do{
-
-		registro.baloes=rand_fill();
-		strcpy(registro.equipe,randstring(VALL-1)); 
-		registro.erros=rand_fill();
-		strcpy(registro.nome1,randstring(VALL-1));
-		strcpy(registro.nome2,randstring(VALL-1));
-		strcpy(registro.nome3,randstring(VALL-1));
-
-
-		//Escreve valores no arquivo
-		fwrite(&registro,sizeof(reg),1,fp);
-		count++;
-		
-		
-		fseek(fp, 0L, SEEK_END);  // percorre até o fim do arquivo 
-		sz = ftell(fp);           // informa tamanho e armazena em SZ
-		
-	}while(sz<Wanted_size);
-	
-	fclose(fp);
-	return count;
-}
-
-void lerRegistro(int cont,FILE *fp,char nome_arq[],int opc){
-	double valRegistro;
-	int t,size;
-	long pos;
-	int offset; //variavel aponta para endereço no arquivo
-	reg registroleitura;  //leitura para o registro8
-	
-	fp= fopen(nome_arq, "rb");
-	if(fp == NULL){
-        perror("fopen\n");
-        exit(EXIT_FAILURE);
-    }
-    	
-  	fseek(fp,0,SEEK_SET);
-  	
-	fread(&registroleitura,sizeof(reg),1,fp);
-	
-  	switch(opc){
-		case 1:
-			printf("\n Equipe: %s\n",registroleitura.equipe);
-			break;
-		case 2:	
-			printf("\n Erros: %i\n",registroleitura.erros);
-			break;
-		case 3:
-			printf("\n Baloao: %i\n",registroleitura.baloes);
-			break;
-		case 4:
-			printf("\n Nome1: %s\n",registroleitura.nome1);
-			break;
-		case 5:
-			printf("\n Nome2: %s\n",registroleitura.nome2);
-			break;
-		case 6:
-			printf("\n Nome3: %s\n",registroleitura.nome3);
-			break;			
-	}	
-	close(fp);
-	
-	
-}
-
-//criar arquivo contendo a quantidade de registros inseridos.
-void registra(double registro,FILE *cc, char nome_reg[]){
-	if (( cc = fopen(nome_reg,"wb")) == NULL ){	//abre o arquivo
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
-	}
-	fprintf(cc,"%.0lf",registro);
-	fclose(cc);
-}
-
-double leQuantReg(FILE *cc,char nome_reg[]){
-	double total; 
-	char *buffer = NULL;
-   	int string_size, read_size;
-	
-	//testa abertura do arquivo
-	if (( cc = fopen(nome_reg,"rb")) == NULL ){	//abre o arquivo
- 		printf ("Erro na abertura do arquivo");
-		exit (0);
-	}
-	
-	//busca final do arquivo
-	fseek(cc, 0, SEEK_END);
-	string_size = ftell(cc);
-	rewind(cc);
-	
-	//aloca buffer
-	buffer = (char*) malloc(sizeof(char) * (string_size + 1) );
-	
-	//efetua leitura
-	read_size = fread(buffer, sizeof(char), string_size, cc);
-	//marcador de final do buffer
-	buffer[string_size] = '\0';
-	
-	//valida se leitura deu certo
-	if (string_size != read_size)
-       {
-           // Algo deu errado
-           // buffer vira NULL
-           free(buffer);
-           buffer = NULL;
-       }
-       
-	fclose(cc);
-	
-	
-	//converte string para int
-	total= atoi(buffer);
-	
-	//imprime valor
-	printf("\nTotal de registros no arquivo: %.0lf",total);
-	
-	return total;
-}
-
-void indices (FILE *cc,char nome){
-		
-	
-	}
-
-
-
 
 
