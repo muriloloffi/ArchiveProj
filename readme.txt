@@ -1,0 +1,1 @@
+Alteração na geração dos registros do arquivo salvando a struct completa.

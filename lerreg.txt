@@ -1,0 +1,44 @@
+double leQuantReg(FILE *cc,char nome_reg[]){
+	double total; 
+	char *buffer = NULL;
+   	int string_size, read_size;
+	
+	//testa abertura do arquivo
+	if (( cc = fopen(nome_reg,"rb")) == NULL ){	//abre o arquivo
+ 		printf ("Erro na abertura do arquivo");
+		exit (0);
+	}
+	
+	//busca final do arquivo
+	fseek(cc, 0, SEEK_END);
+	string_size = ftell(cc);
+	rewind(cc);
+	
+	//aloca buffer
+	buffer = (char*) malloc(sizeof(char) * (string_size + 1) );
+	
+	//efetua leitura
+	read_size = fread(buffer, sizeof(char), string_size, cc);
+	//marcador de final do buffer
+	buffer[string_size] = '\0';
+	
+	//valida se leitura deu certo
+	if (string_size != read_size)
+       {
+           // Algo deu errado
+           // buffer vira NULL
+           free(buffer);
+           buffer = NULL;
+       }
+       
+	fclose(cc);
+	
+	
+	//converte string para int
+	sscanf(buffer,"%f",&total);
+	
+	//imprime valor
+	printf("\nTotal de registros no arquivo: %f",total);
+	
+	return total;
+}

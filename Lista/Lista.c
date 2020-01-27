@@ -33,7 +33,7 @@ int lista_vazia(LDE l){
 /*int insereNoInicio(Lista *p, void *info){
 	Elemento *novo = malloc(sizeof(Elemento));
 	if (novo == NULL)
-		return 0; //erro! faltou memÃ³ria
+		return 0; //erro! faltou memória
 	novo->info = malloc(p->tamInfo);
 	if(novo->info == NULL){
 		free(novo);
@@ -45,9 +45,9 @@ int lista_vazia(LDE l){
 	return 1; //sucesso
 }*/
 
-/* >>>>>FUNÃ‡ÃƒO 'INSERE NO INICIO' ACIMA */
+/* >>>>>FUNÇÃO 'INSERE NO INICIO' ACIMA */
 /* >>>>>REFATORADA ABAIXO */
-/* >>>>>FUNÃ‡ÃƒO 'ALOCA ELEMENTO' SERÃ REUTILIZADA */ 
+/* >>>>>FUNÇÃO 'ALOCA ELEMENTO' SERÁ REUTILIZADA */ 
 
 EleDuplo *aloca_ele(void *x, int t){
 	EleDuplo *p=malloc(sizeof(EleDuplo));
@@ -70,7 +70,7 @@ int insereNoInicio(LDE *l, void *info){
 	l->cabeca = novo;
 	novo->ant = NULL;
 	if(novo->suc != NULL){
-		novo->suc->ant = novo; //Se a lista nÃ£o estiver vazia, aponta o antecessor do segundo elemento de volta para o primeiro.
+		novo->suc->ant = novo; //Se a lista não estiver vazia, aponta o antecessor do segundo elemento de volta para o primeiro.
 	}
 	return 1; //sucesso
 }
@@ -92,7 +92,7 @@ int removeDoInicio(LDE *l, void *info){
 		return ERRO_LISTA_VAZIA;
 	EleDuplo *p = l->cabeca;
 	l->cabeca = p->suc;
-	if(l->cabeca != NULL) //testa se sÃ³ havia 1 elemento
+	if(l->cabeca != NULL) //testa se só havia 1 elemento
 		p->suc->ant = NULL;
 	memcpy(info, p->info, l->tamInfo);
 	free(p->info);
@@ -108,12 +108,12 @@ int insereNoFim(LDE *l, void *info){
 		p = p->suc;
 	}
 	EleDuplo *novo = aloca_ele(info, l->tamInfo); 
-	/*REAPROVEITANDO CÃ“DIGO, 
-	conforme cÃ³digo refatorado 
-	anteriormente NA FUNÃ‡ÃƒO 'insereNoInicio'
+	/*REAPROVEITANDO CÓDIGO, 
+	conforme código refatorado 
+	anteriormente NA FUNÇÃO 'insereNoInicio'
 	*/
 	if (novo == NULL)
-		return 0; //Erro na alocaÃ§Ã£o.
+		return 0; //Erro na alocação.
 	novo->suc = NULL;
 	p->suc = novo;
 	novo->ant = p; 
@@ -124,18 +124,18 @@ int removeDoFim(LDE *l, void *info){
 	if(lista_vazia(*l))
 		return ERRO_LISTA_VAZIA;
 	if(l->cabeca->suc == NULL) //Somente 1 elemento.
-		return removeDoInicio(l,info); //Novamente reutilizando cÃ³digo.
+		return removeDoInicio(l,info); //Novamente reutilizando código.
 	EleDuplo *p = l->cabeca;
 	while(p->suc->suc != NULL){ 
 		p = p->suc;	
-		/* CondiÃ§Ã£o de parada no penultimo elemento, que apÃ³s a operaÃ§Ã£o apontarÃ¡ para NULL */
+		/* Condição de parada no penultimo elemento, que após a operação apontará para NULL */
 	}
-	EleDuplo *x = p->suc; //Este serÃ¡ o elemento desalocado
+	EleDuplo *x = p->suc; //Este será o elemento desalocado
 	memcpy(info, x->info, l->tamInfo);
 	free(x->info);
 	free(x);
 	p->suc = NULL; 
-	/*PenÃºltimo elemento passa a apontar para NULL sem que seja necessÃ¡rio
+	/*Penúltimo elemento passa a apontar para NULL sem que seja necessário
 	percorrer toda a lista novamente*/
 	return 1; //sucesso
 }
@@ -149,12 +149,11 @@ void desaloca_lista(LDE *l){
 		p=sucessor;
 	}
 	l->cabeca = NULL; //ADAPTAR PARA LDE
-} //MÃ‰TODO N.1 
+} //MÉTODO N.1 
 
-/* MÃ‰TODO N.2:
-Podemos utilizar abstraÃ§Ã£o e resolver o mesmo problema com um
-cÃ³digo mais elegante
-
+/* MÉTODO N.2:
+Podemos utilizar abstração e resolver o mesmo problema com um
+código mais elegante
 void desaloca_lista_v2(Lista *l){
 	void *aux = malloc(l->tamInfo);
 	while(!lista_vazia(*l)){
@@ -166,11 +165,11 @@ void desaloca_lista_v2(Lista *l){
 
 int insereNaPos(LDE *l, void *info, int pos){
 	if (pos < 0)
-		return ERRO_POS_INVALIDA; //Nao Ã© possÃ­vel posiÃ§Ãµes negativas
+		return ERRO_POS_INVALIDA; //Nao é possível posições negativas
 	if (pos == 0)
-		return insereNoInicio(l, info); //chamamento de funÃ§Ã£o == reaproveitando cÃ³digo
+		return insereNoInicio(l, info); //chamamento de função == reaproveitando código
 	if (lista_vazia(*l)) 
-		return ERRO_POS_INVALIDA; 	//caso a posiÃ§Ã£o > 0
+		return ERRO_POS_INVALIDA; 	//caso a posição > 0
 	EleDuplo *p = l->cabeca;
 	int cont = 0;
 	while(cont < pos-1 && p->suc != NULL ){
@@ -181,10 +180,10 @@ int insereNaPos(LDE *l, void *info, int pos){
 		return ERRO_POS_INVALIDA;
 	EleDuplo *novo = aloca_ele(info, l->tamInfo);
 	if(novo == NULL)
-		return 0; 		//Erro na alocaÃ§Ã£o
+		return 0; 		//Erro na alocação
 	novo->suc = p->suc;
 	p->suc = novo;
-	novo->suc->ant = novo; 		//atenÃ§Ã£o com a ordem neste fim,
+	novo->suc->ant = novo; 		//atenção com a ordem neste fim,
 	novo->ant = p;			//caso 'p->proximo = novo'
 	return 1; //sucesso
 }
@@ -226,7 +225,7 @@ int leNaPos(LDE *l, void *info, int pos){
 	}
 	if(cont != pos)
 		return ERRO_POS_INVALIDA;
-	memcpy(info, p->info, l->tamInfo); //para a funÃ§Ã£o modificaNaPos, basta inverter os 2 primerios parÃ¢metros.
+	memcpy(info, p->info, l->tamInfo); //para a função modificaNaPos, basta inverter os 2 primerios parâmetros.
 	return 1; //sucesso
 }
 
@@ -246,10 +245,10 @@ int busca(LDE l, void *chave, int (*compara)(void *, void *)){
 	while(p != NULL){
 		if(compara(chave,p->info)==0)
 			return cont; //ENCONTROU!
-		cont++; //DO CONTRÃRIO CONTINUA PERCORRENDO
+		cont++; //DO CONTRÁRIO CONTINUA PERCORRENDO
 		p = p->suc;
 		}
-	return -1; //NÃ£o encontrou
+	return -1; //Não encontrou
 }//REFATORAR p/ LDE
 
 //EXERCICIO 9 - LISTA 5
@@ -259,8 +258,8 @@ void inverte (LDE l){
 	while(p2->suc!=NULL)
 		p2=p2->suc;
 	while(p1 != p2 && p2->suc != p1){
- 		/*tambÃ©m poderÃ­amos utilizar 'p2 != p1->ant'
-		como critÃ©rio de parada*/
+ 		/*também poderíamos utilizar 'p2 != p1->ant'
+		como critério de parada*/
 		void *aux = p1->info;
 		p1->info = p2->info;
 		p2->info = aux;

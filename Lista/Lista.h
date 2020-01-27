@@ -1,4 +1,4 @@
- /********************************************************           
+/********************************************************           
   * TAD LDE -- program to initialize, manipulate and     *
   *            print Lists.                              *
   *                                                      *   
@@ -20,7 +20,7 @@
 #define ERRO_LISTA_VAZIA -1
 #define ERRO_POS_INVALIDA -2
 
-typedef struct ele{ //aqui a gente d√° nome "ele" √† estrutura para que ela possa se auto referenciar na declara√ß√£o do ponteiro proximo 
+typedef struct ele{ //aqui a gente d· nome "ele" ‡ estrutura para que ela possa se auto referenciar na declaraÁ„o do ponteiro proximo 
 	void *info;
 	struct ele *suc, *ant;
 }EleDuplo;
